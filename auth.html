@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sign In — NEXUS AI Generation Atlas</title>
+    <meta name="description" content="Access the NEXUS AI console. Sign in to generate videos and images with Sora 2, Seedance 2, Midjourney v7 and 50+ models.">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg: #0a0a0a; --bg-2: #0f0f12; --surface: #14141a; --surface-2: #1c1c24;
+            --border: #26262e; --border-strong: #3a3a44; --text: #f4efe6; --text-dim: #8a857c;
+            --text-faint: #56524c; --accent: #ff3d00; --accent-2: #e6ff3d; --accent-3: #ff2d6f;
+            --green: #3dff8a; --display: 'Instrument Serif', serif; --sans: 'Space Grotesk', sans-serif;
+            --mono: 'JetBrains Mono', monospace;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        html { scroll-behavior: smooth; }
+        body {
+            background: var(--bg); color: var(--text); font-family: var(--sans);
+            overflow-x: hidden; line-height: 1.5; -webkit-font-smoothing: antialiased;
+            min-height: 100vh; display: flex;
+        }
+        ::selection { background: var(--accent); color: #000; }
+        a { text-decoration: none; color: inherit; }
+
+        /* Left Visual Side */
+        .auth-visual {
+            flex: 1; background: linear-gradient(135deg, #1a0a05 0%, #0a0a0a 100%);
+            display: flex; flex-direction: column; justify-content: space-between;
+            padding: 40px; position: relative; overflow: hidden; border-right: 1px solid var(--border);
+        }
+        .auth-visual::before {
+            content: ''; position: absolute; top: -20%; right: -20%;
+            width: 600px; height: 600px; background: var(--accent);
+            filter: blur(150px); opacity: 0.15; border-radius: 50%;
+        }
+        .logo-back { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 18px; z-index: 2; }
+        .logo-mark {
+            width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center;
+            background: linear-gradient(135deg, var(--accent), var(--accent-3));
+            font-family: var(--display); font-style: italic; color: #fff; font-size: 18px;
+        }
+        .visual-content { z-index: 2; }
+        .visual-content h2 {
+            font-family: var(--display); font-style: italic; font-weight: 400;
+            font-size: clamp(2.5rem, 5vw, 4.5rem); line-height: 1; margin-bottom: 20px;
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-3) 50%, var(--accent-2) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .visual-content p { color: var(--text-dim); max-width: 400px; font-size: 1.1rem; }
+        .visual-footer { z-index: 2; font-family: var(--mono); font-size: 11px; color: var(--text-faint); display: flex; align-items: center; gap: 8px; }
+        .dot-live { width: 6px; height: 6px; border-radius: 50%; background: var(--green); box-shadow: 0 0 10px var(--green); animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+        /* Right Form Side */
+        .auth-form-side { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 24px; }
+        .form-container { width: 100%; max-width: 400px; }
+        .mobile-logo { display: none; justify-content: center; margin-bottom: 40px; }
+        .form-header { margin-bottom: 32px; }
+        .form-header h1 { font-family: var(--display); font-style: italic; font-weight: 400; font-size: 2.5rem; margin-bottom: 8px; }
+        .form-header p { color: var(--text-dim); font-size: 15px; }
+
+        /* Tabs */
+        .auth-tabs { display: flex; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 4px; margin-bottom: 24px; }
+        .tab-btn {
+            flex: 1; padding: 10px; text-align: center; font-family: var(--mono); font-size: 12px;
+            letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-dim);
+            background: transparent; border: none; cursor: pointer; border-radius: 8px; transition: all 0.3s; z-index: 2;
+        }
+        .tab-btn.active { color: var(--text); background: var(--bg-2); }
+
+        /* Form Elements */
+        .input-group { margin-bottom: 16px; }
+        .input-label { display: block; font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 8px; }
+        .input-wrapper { position: relative; display: flex; align-items: center; background: var(--bg-2); border: 1px solid var(--border); border-radius: 10px; transition: border-color 0.2s; }
+        .input-wrapper:focus-within { border-color: var(--accent); }
+        .input-wrapper i { padding: 0 14px; color: var(--text-faint); font-size: 14px; }
+        .auth-input { flex: 1; background: transparent; border: none; outline: none; padding: 14px 14px 14px 0; color: var(--text); font-family: var(--sans); font-size: 15px; }
+        .password-toggle { background: none; border: none; color: var(--text-dim); cursor: pointer; padding: 0 14px; }
+
+        .form-options { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; font-size: 13px; }
+        .checkbox-wrapper { display: flex; align-items: center; gap: 8px; color: var(--text-dim); cursor: pointer; }
+        .checkbox-wrapper input { accent-color: var(--accent); width: 14px; height: 14px; }
+        .forgot-link { color: var(--accent); font-family: var(--mono); font-size: 11px; text-transform: uppercase; }
+
+        .btn-submit {
+            width: 100%; background: var(--text); color: var(--bg); border: 1px solid var(--text);
+            padding: 16px; border-radius: 10px; font-size: 15px; font-weight: 500; cursor: pointer;
+            transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-submit:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+        .divider { display: flex; align-items: center; gap: 12px; margin: 24px 0; color: var(--text-faint); font-size: 12px; font-family: var(--mono); }
+        .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+        .social-btn {
+            width: 100%; background: var(--surface); border: 1px solid var(--border); color: var(--text);
+            padding: 14px; border-radius: 10px; font-size: 14px; font-weight: 500; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 12px; transition: 0.2s;
+        }
+        .social-btn:hover { border-color: var(--border-strong); background: var(--surface-2); }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px);
+            background: var(--surface-2); border: 1px solid var(--accent-3); color: var(--text);
+            padding: 14px 24px; border-radius: 12px; font-size: 14px; z-index: 9999;
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); display: flex; align-items: center; gap: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); }
+        .toast i { color: var(--accent-3); }
+
+        /* Responsive */
+        @media (max-width: 860px) {
+            .auth-visual { display: none; }
+            .mobile-logo { display: flex; }
+            body { flex-direction: column; }
+            .auth-form-side { min-height: 100vh; padding-top: 60px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Left Visual Side -->
+    <aside class="auth-visual">
+        <a href="index.html" class="logo-back">
+            <div class="logo-mark">N</div>
+            <span>NEXUS</span>
+        </a>
+        
+        <div class="visual-content">
+            <h2>Welcome to the <span class="gradient-text">new canvas.</span></h2>
+            <p>Sign in to access 52 frontier AI models. Generate cinema-grade video and photonic images — all from one unified console.</p>
+        </div>
+
+        <div class="visual-footer">
+            <span class="dot-live"></span>
+            All systems operational · 1.8s avg latency
+        </div>
+    </aside>
+
+    <!-- Right Form Side -->
+    <main class="auth-form-side">
+        <div class="form-container">
+            
+            <a href="index.html" class="logo-back mobile-logo">
+                <div class="logo-mark">N</div>
+                <span>NEXUS</span>
+            </a>
+
+            <div class="form-header">
+                <h1 id="formTitle">Sign in</h1>
+                <p id="formSubtitle">Welcome back. Let's create something extraordinary.</p>
+            </div>
+
+            <!-- Tabs -->
+            <div class="auth-tabs">
+                <button class="tab-btn active" id="signinTab" onclick="switchTab('signin')">Sign In</button>
+                <button class="tab-btn" id="signupTab" onclick="switchTab('signup')">Create Account</button>
+            </div>
+
+            <!-- Sign In Form -->
+            <form id="signinForm" onsubmit="handleSignIn(event)">
+                <div class="input-group">
+                    <label class="input-label">Email Address</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-envelope"></i>
+                        <input type="email" id="signinEmail" class="auth-input" placeholder="you@nexus.ai" required>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Password</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-lock"></i>
+                        <input type="password" id="signinPassword" class="auth-input" placeholder="••••••••" required>
+                        <button type="button" class="password-toggle"><i class="fa-solid fa-eye"></i></button>
+                    </div>
+                </div>
+                <div class="form-options">
+                    <label class="checkbox-wrapper">
+                        <input type="checkbox" checked> Keep me signed in
+                    </label>
+                    <a href="#" class="forgot-link">Forgot Password?</a>
+                </div>
+                <button type="submit" class="btn-submit">
+                    Sign In <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </form>
+
+            <!-- Sign Up Form -->
+            <form id="signupForm" style="display: none;" onsubmit="handleSignUp(event)">
+                <div class="input-group">
+                    <label class="input-label">Full Name</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-user"></i>
+                        <input type="text" id="signupName" class="auth-input" placeholder="John Doe" required>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Email Address</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-envelope"></i>
+                        <input type="email" id="signupEmail" class="auth-input" placeholder="you@nexus.ai" required>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Create Password</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-lock"></i>
+                        <input type="password" id="signupPassword" class="auth-input" placeholder="Min. 8 characters" required>
+                        <button type="button" class="password-toggle"><i class="fa-solid fa-eye"></i></button>
+                    </div>
+                </div>
+                <div class="form-options">
+                    <label class="checkbox-wrapper">
+                        <input type="checkbox" required> I agree to the Terms & Privacy
+                    </label>
+                </div>
+                <button type="submit" class="btn-submit">
+                    Create Account <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </form>
+
+            <div class="divider">OR CONTINUE WITH</div>
+
+            <button class="social-btn" onclick="showToast('Google sign-in is temporarily unavailable.')">
+                <i class="fa-brands fa-google" style="color: #fff;"></i> Continue with Google
+            </button>
+            <button class="social-btn" onclick="showToast('GitHub sign-in is temporarily unavailable.')">
+                <i class="fa-brands fa-github" style="color: #fff;"></i> Continue with GitHub
+            </button>
+
+        </div>
+    </main>
+
+    <!-- Toast Notification Element -->
+    <div class="toast" id="toast">
+        <i class="fa-solid fa-circle-info"></i>
+        <span id="toastMsg">Message</span>
+    </div>
+
+    <script>
+        // Tab Switching Logic
+        function switchTab(tab) {
+            const signinForm = document.getElementById('signinForm');
+            const signupForm = document.getElementById('signupForm');
+            const signinTab = document.getElementById('signinTab');
+            const signupTab = document.getElementById('signupTab');
+            const formTitle = document.getElementById('formTitle');
+            const formSubtitle = document.getElementById('formSubtitle');
+
+            if (tab === 'signin') {
+                signinForm.style.display = 'block';
+                signupForm.style.display = 'none';
+                signinTab.classList.add('active');
+                signupTab.classList.remove('active');
+                formTitle.innerText = 'Sign in';
+                formSubtitle.innerText = 'Welcome back. Let\'s create something extraordinary.';
+            } else {
+                signinForm.style.display = 'none';
+                signupForm.style.display = 'block';
+                signinTab.classList.remove('active');
+                signupTab.classList.add('active');
+                formTitle.innerText = 'Create account';
+                formSubtitle.innerText = 'Start with 50 free credits. No card required.';
+            }
+        }
+
+        // Toast Notification Logic
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toastMsg');
+            toastMsg.innerText = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000); // Hide after 3 seconds
+        }
+
+        // Sign Up Logic (Local Storage)
+        function handleSignUp(event) {
+            event.preventDefault();
+            const name = document.getElementById('signupName').value;
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+
+            // Save user data locally
+            const userData = {
+                name: name,
+                email: email,
+                password: password, // For demo purposes only
+                credits: 50 // Give them 50 free credits to start
+            };
+
+            localStorage.setItem('nexusUser', JSON.stringify(userData));
+            
+            // Redirect to Dashboard
+            window.location.href = 'dashboard.html';
+        }
+
+        // Sign In Logic (Local Storage)
+        function handleSignIn(event) {
+            event.preventDefault();
+            const email = document.getElementById('signinEmail').value;
+            const password = document.getElementById('signinPassword').value;
+
+            // Get saved user data
+            const savedUser = localStorage.getItem('nexusUser');
+
+            if (savedUser) {
+                const user = JSON.parse(savedUser);
+                // Check if credentials match
+                if (user.email === email && user.password === password) {
+                    window.location.href = 'dashboard.html';
+                } else {
+                    showToast('Incorrect email or password. Please try again.');
+                }
+            } else {
+                showToast('No account found. Please create an account first.');
+            }
+        }
+
+        // Password Toggle Logic
+        document.querySelectorAll('.password-toggle').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const input = e.currentTarget.previousElementSibling;
+                const icon = e.currentTarget.querySelector('i');
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash');
+                } else {
+                    input.type = 'password';
+                    icon.classList.remove('fa-eye-slash');
+                    icon.classList.add('fa-eye');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
