@@ -17,8 +17,9 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('sidebar').classList.toggle('active');
     });
 
+    // Redirect + button to tasks page
     document.getElementById('addCreditsBtn').addEventListener('click', () => {
-        showToast('Task system coming soon. Earn credits by completing offers.');
+        window.location.href = 'tasks.html';
     });
 
     renderGallery();
