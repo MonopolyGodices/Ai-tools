@@ -225,7 +225,21 @@ function finishGeneration() {
     addLog(`> Generation complete! Asset delivered.`, 'success');
     
     const seed = Math.floor(Math.random() * 9999);
-    previewImg.src = `https://picsum.photos/seed/nexus${seed}/800/450.jpg`;
+    const imgUrl = `https://picsum.photos/seed/nexus${seed}/800/450.jpg`;
+    previewImg.src = imgUrl;
+    
+    // Save to Gallery History (Local Storage)
+    const newAsset = {
+        id: Date.now(),
+        url: imgUrl,
+        model: activeModel.dataset.name,
+        type: activeModel.dataset.type,
+        date: new Date().toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+    };
+    
+    let history = JSON.parse(localStorage.getItem('nexusHistory') || '[]');
+    history.unshift(newAsset); // Add to the beginning of the array
+    localStorage.setItem('nexusHistory', JSON.stringify(history));
     
     loadingOverlay.classList.remove('active');
     generateBtn.disabled = false;
