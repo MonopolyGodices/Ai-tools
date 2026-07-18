@@ -2,7 +2,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     const savedUser = localStorage.getItem('nexusUser');
     
-    // If no user found, redirect to auth
     if (!savedUser) {
         window.location.href = 'auth.html';
         return;
@@ -10,46 +9,113 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const user = JSON.parse(savedUser);
     
-    // Populate UI
     document.getElementById('userName').innerText = user.name;
     document.getElementById('userCredits').innerText = user.credits;
     document.querySelector('.avatar').innerText = user.name.charAt(0).toUpperCase();
 
-    // Logout Logic
     document.getElementById('logoutBtn').addEventListener('click', () => {
         localStorage.removeItem('nexusUser');
         window.location.href = 'index.html';
     });
 
-    // Mobile Sidebar Toggle
     const menuToggle = document.getElementById('menuToggle');
     const sidebar = document.getElementById('sidebar');
     menuToggle.addEventListener('click', () => sidebar.classList.toggle('active'));
 });
 
-// UI Interactions
+// ===== CUSTOM MODEL SELECTOR LOGIC =====
+const selectTrigger = document.getElementById('selectTrigger');
+const selectDropdown = document.getElementById('selectDropdown');
+const selectChevron = document.getElementById('selectChevron');
+const modelSearch = document.getElementById('modelSearch');
+const triggerName = document.getElementById('triggerName');
+const triggerProvider = document.getElementById('triggerProvider');
+const triggerIcon = document.getElementById('triggerIcon');
+const modelItems = document.querySelectorAll('.model-item');
+
+// Toggle dropdown
+selectTrigger.addEventListener('click', (e) => {
+    e.stopPropagation();
+    selectTrigger.classList.toggle('active');
+    selectDropdown.classList.toggle('active');
+});
+
+// Close dropdown when clicking outside
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('#customSelect')) {
+        selectTrigger.classList.remove('active');
+        selectDropdown.classList.remove('active');
+    }
+});
+
+// Select model
+modelItems.forEach(item => {
+    item.addEventListener('click', () => {
+        // Remove active from all
+        modelItems.forEach(i => i.classList.remove('active'));
+        item.classList.add('active');
+        
+        // Update trigger
+        triggerName.innerText = item.dataset.name;
+        triggerProvider.innerText = item.dataset.provider;
+        
+        // Update icon based on type
+        if (item.dataset.type === 'video') {
+            triggerIcon.innerHTML = '<i class="fa-solid fa-film"></i>';
+        } else {
+            triggerIcon.innerHTML = '<i class="fa-solid fa-image"></i>';
+        }
+        
+        // Close dropdown
+        selectTrigger.classList.remove('active');
+        selectDropdown.classList.remove('active');
+        
+        // Switch tab if needed
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        tabBtns.forEach(t => t.classList.remove('active'));
+        if (item.dataset.type === 'video') {
+            document.querySelector('[data-tab="video"]').classList.add('active');
+        } else {
+            document.querySelector('[data-tab="image"]').classList.add('active');
+        }
+    });
+});
+
+// Search functionality
+modelSearch.addEventListener('input', (e) => {
+    const term = e.target.value.toLowerCase();
+    modelItems.forEach(item => {
+        const name = item.dataset.name.toLowerCase();
+        const provider = item.dataset.provider.toLowerCase();
+        if (name.includes(term) || provider.includes(term)) {
+            item.style.display = 'flex';
+        } else {
+            item.style.display = 'none';
+        }
+    });
+});
+
+// Pills selection
 const pills = document.querySelectorAll('.pill');
 pills.forEach(pill => {
     pill.addEventListener('click', () => {
-        // Remove active from siblings
         const parent = pill.parentElement;
         parent.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
         pill.classList.add('active');
     });
 });
 
-// Tab Switching
+// Tab switching
 const tabs = document.querySelectorAll('.tab-btn');
 tabs.forEach(tab => {
     tab.addEventListener('click', () => {
         tabs.forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
         
-        const modelSelect = document.getElementById('modelSelect');
-        if(tab.dataset.tab === 'video') {
-            modelSelect.selectedIndex = 0; // First video model
-        } else {
-            modelSelect.selectedIndex = 6; // First image model (Nano Banana Pro)
+        // Auto-select first model of that type
+        const firstModel = document.querySelector(`.model-item[data-type="${tab.dataset.tab}"]`);
+        if (firstModel) {
+            firstModel.click();
         }
     });
 });
@@ -68,7 +134,6 @@ generateBtn.addEventListener('click', () => {
     const user = JSON.parse(savedUser);
     const cost = 5;
 
-    // Check credits
     if (user.credits < cost) {
         addLog('Error: Insufficient credits. Please complete tasks to earn more.', 'error');
         statusText.innerText = 'Error · Insufficient credits';
@@ -76,19 +141,18 @@ generateBtn.addEventListener('click', () => {
         return;
     }
 
-    // Deduct credits
     user.credits -= cost;
     localStorage.setItem('nexusUser', JSON.stringify(user));
     document.getElementById('userCredits').innerText = user.credits;
 
-    // Start generation process
     generateBtn.disabled = true;
     generateBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generating...';
     loadingOverlay.classList.add('active');
     statusText.innerText = 'Processing...';
     statusText.style.color = 'var(--accent-2)';
     
-    addLog(`> Task started: ${document.getElementById('modelSelect').value}`, 'info');
+    const activeModel = document.querySelector('.model-item.active');
+    addLog(`> Task started: ${activeModel.dataset.name} (${activeModel.dataset.provider})`, 'info');
     
     let progress = 0;
     const interval = setInterval(() => {
@@ -102,21 +166,19 @@ generateBtn.addEventListener('click', () => {
 });
 
 function finishGeneration() {
-    const model = document.getElementById('modelSelect').value.split(' — ')[0];
+    const activeModel = document.querySelector('.model-item.active');
     addLog(`> Generation complete! Asset delivered.`, 'success');
     
-    // Change image randomly to simulate new generation
     const seed = Math.floor(Math.random() * 9999);
     previewImg.src = `https://picsum.photos/seed/nexus${seed}/800/450.jpg`;
     
     loadingOverlay.classList.remove('active');
     generateBtn.disabled = false;
     generateBtn.innerHTML = '<i class="fa-solid fa-bolt"></i> Generate (Cost: 5 Credits)';
-    statusText.innerText = `Idle · Last gen: ${model}`;
+    statusText.innerText = `Idle · Last gen: ${activeModel.dataset.name}`;
     statusText.style.color = 'var(--text-dim)';
 }
 
-// Logger
 function addLog(message, type = 'info') {
     const div = document.createElement('div');
     div.innerText = message;
