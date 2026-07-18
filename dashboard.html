@@ -25,7 +25,7 @@
         <div class="nav-right">
             <div class="credits-badge">
                 <i class="fa-solid fa-bolt"></i>
-                <span id="userCredits">0</span> Credits
+                <span id="userCredits">0</span>
             </div>
             <div class="user-info">
                 <span id="userName">User</span>
@@ -61,27 +61,137 @@
             <div class="playground-grid">
                 <!-- Left Controls -->
                 <div class="control-panel">
-                    <!-- Model Selector -->
+                    
+                    <!-- Custom Model Selector -->
                     <div class="input-group">
                         <label>Active Model</label>
-                        <select id="modelSelect" class="dash-input">
-                            <optgroup label="Video Models">
-                                <option>Seedance 2 — ByteDance</option>
-                                <option>Sora 2 — OpenAI</option>
-                                <option>Veo 3 — Google DeepMind</option>
-                                <option>Gemini Omni — Google</option>
-                                <option>Kling 2.5 — Kuaishou</option>
-                                <option>Runway Gen-4 — Runway</option>
-                            </optgroup>
-                            <optgroup label="Image Models">
-                                <option>Nano Banana Pro — Google</option>
-                                <option>Midjourney v7 — Midjourney</option>
-                                <option>Flux 2 Pro — Black Forest Labs</option>
-                                <option>DALL·E 4 — OpenAI</option>
-                                <option>Imagen 4 Ultra — Google</option>
-                                <option>Seedream 3 — ByteDance</option>
-                            </optgroup>
-                        </select>
+                        <div class="custom-select" id="customSelect">
+                            <button class="select-trigger" id="selectTrigger">
+                                <div class="trigger-content">
+                                    <div class="model-icon" id="triggerIcon"><i class="fa-solid fa-film"></i></div>
+                                    <div class="trigger-text">
+                                        <span class="trigger-name" id="triggerName">Seedance 2</span>
+                                        <span class="trigger-provider" id="triggerProvider">ByteDance</span>
+                                    </div>
+                                </div>
+                                <i class="fa-solid fa-chevron-down chevron" id="selectChevron"></i>
+                            </button>
+                            
+                            <div class="select-dropdown" id="selectDropdown">
+                                <div class="dropdown-search">
+                                    <i class="fa-solid fa-magnifying-glass"></i>
+                                    <input type="text" id="modelSearch" placeholder="Search 52 models..." class="search-input">
+                                </div>
+                                
+                                <div class="dropdown-section">
+                                    <div class="dropdown-label">Video Models</div>
+                                    <div class="model-list" id="videoModelsList">
+                                        <div class="model-item active" data-type="video" data-name="Seedance 2" data-provider="ByteDance" data-badge="New">
+                                            <div class="model-item-icon"><i class="fa-solid fa-film"></i></div>
+                                            <div class="model-item-info">
+                                                <span class="model-item-name">Seedance 2</span>
+                                                <span class="model-item-provider">ByteDance · 4K · 60s</span>
+                                            </div>
+                                            <span class="model-badge badge-new">New</span>
+                                        </div>
+                                        <div class="model-item" data-type="video" data-name="Sora 2" data-provider="OpenAI" data-badge="New">
+                                            <div class="model-item-icon"><i class="fa-solid fa-film"></i></div>
+                                            <div class="model-item-info">
+                                                <span class="model-item-name">Sora 2</span>
+                                                <span class="model-item-provider">OpenAI · 4K · 60s</span>
+                                            </div>
+                                            <span class="model-badge badge-new">New</span>
+                                        </div>
+                                        <div class="model-item" data-type="video" data-name="Veo 3" data-provider="Google DeepMind" data-badge="New">
+                                            <div class="model-item-icon"><i class="fa-solid fa-film"></i></div>
+                                            <div class="model-item-info">
+                                                <span class="model-item-name">Veo 3</span>
+                                                <span class="model-item-provider">Google DeepMind · 4K · 90s</span>
+                                            </div>
+                                            <span class="model-badge badge-new">New</span>
+                                        </div>
+                                        <div class="model-item" data-type="video" data-name="Gemini Omni" data-provider="Google" data-badge="Pro">
+                                            <div class="model-item-icon"><i class="fa-solid fa-film"></i></div>
+                                            <div class="model-item-info">
+                                                <span class="model-item-name">Gemini Omni</span>
+                                                <span class="model-item-provider">Google · 4K · Multimodal</span>
+                                            </div>
+                                            <span class="model-badge badge-pro">Pro</span>
+                                        </div>
+                                        <div class="model-item" data-type="video" data-name="Kling 2.5" data-provider="Kuaishou" data-badge="New">
+                                            <div class="model-item-icon"><i class="fa-solid fa-film"></i></div>
+                                            <div class="model-item-info">
+                                                <span class="model-item-name">Kling 2.5</span>
+                                                <span class="model-item-provider">Kuaishou · 4K · 30s</span>
+                                            </div>
+                                            <span class="model-badge badge-new">New</span>
+                                        </div>
+                                        <div class="model-item" data-type="video" data-name="Runway Gen-4" data-provider="Runway" data-badge="New">
+                                            <div class="model-item-icon"><i class="fa-solid fa-film"></i></div>
+                                            <div class="model-item-info">
+                                                <span class="model-item-name">Runway Gen-4</span>
+                                                <span class="model-item-provider">Runway · 4K · 30s</span>
+                                            </div>
+                                            <span class="model-badge badge-new">New</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="dropdown-section">
+                                    <div class="dropdown-label">Image Models</div>
+                                    <div class="model-list" id="imageModelsList">
+                                        <div class="model-item" data-type="image" data-name="Nano Banana Pro" data-provider="Google" data-badge="Pro">
+                                            <div class="model-item-icon"><i class="fa-solid fa-image"></i></div>
+                                            <div class="model-item-info">
+                                                <span class="model-item-name">Nano Banana Pro</span>
+                                                <span class="model-item-provider">Google · 8K · Photoreal</span>
+                                            </div>
+                                            <span class="model-badge badge-pro">Pro</span>
+                                        </div>
+                                        <div class="model-item" data-type="image" data-name="Midjourney v7" data-provider="Midjourney" data-badge="New">
+                                            <div class="model-item-icon"><i class="fa-solid fa-image"></i></div>
+                                            <div class="model-item-info">
+                                                <span class="model-item-name">Midjourney v7</span>
+                                                <span class="model-item-provider">Midjourney · 8K · Artistic</span>
+                                            </div>
+                                            <span class="model-badge badge-new">New</span>
+                                        </div>
+                                        <div class="model-item" data-type="image" data-name="Flux 2 Pro" data-provider="Black Forest Labs" data-badge="Pro">
+                                            <div class="model-item-icon"><i class="fa-solid fa-image"></i></div>
+                                            <div class="model-item-info">
+                                                <span class="model-item-name">Flux 2 Pro</span>
+                                                <span class="model-item-provider">Black Forest Labs · 8K · Precise</span>
+                                            </div>
+                                            <span class="model-badge badge-pro">Pro</span>
+                                        </div>
+                                        <div class="model-item" data-type="image" data-name="DALL·E 4" data-provider="OpenAI" data-badge="New">
+                                            <div class="model-item-icon"><i class="fa-solid fa-image"></i></div>
+                                            <div class="model-item-info">
+                                                <span class="model-item-name">DALL·E 4</span>
+                                                <span class="model-item-provider">OpenAI · 4K · Editing</span>
+                                            </div>
+                                            <span class="model-badge badge-new">New</span>
+                                        </div>
+                                        <div class="model-item" data-type="image" data-name="Imagen 4 Ultra" data-provider="Google" data-badge="New">
+                                            <div class="model-item-icon"><i class="fa-solid fa-image"></i></div>
+                                            <div class="model-item-info">
+                                                <span class="model-item-name">Imagen 4 Ultra</span>
+                                                <span class="model-item-provider">Google · 4K · Photoreal</span>
+                                            </div>
+                                            <span class="model-badge badge-new">New</span>
+                                        </div>
+                                        <div class="model-item" data-type="image" data-name="Seedream 3" data-provider="ByteDance" data-badge="New">
+                                            <div class="model-item-icon"><i class="fa-solid fa-image"></i></div>
+                                            <div class="model-item-info">
+                                                <span class="model-item-name">Seedream 3</span>
+                                                <span class="model-item-provider">ByteDance · 8K · Multilingual</span>
+                                            </div>
+                                            <span class="model-badge badge-new">New</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Prompt -->
