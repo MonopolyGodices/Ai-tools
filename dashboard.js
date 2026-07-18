@@ -1,14 +1,8 @@
 // Protect Route & Load User Data
 document.addEventListener('DOMContentLoaded', () => {
     const savedUser = localStorage.getItem('nexusUser');
-    
-    if (!savedUser) {
-        window.location.href = 'auth.html';
-        return;
-    }
-
+    if (!savedUser) { window.location.href = 'auth.html'; return; }
     const user = JSON.parse(savedUser);
-    
     document.getElementById('userName').innerText = user.name;
     document.getElementById('userCredits').innerText = user.credits;
     document.querySelector('.avatar').innerText = user.name.charAt(0).toUpperCase();
@@ -18,14 +12,15 @@ document.addEventListener('DOMContentLoaded', () => {
         window.location.href = 'index.html';
     });
 
-    const menuToggle = document.getElementById('menuToggle');
-    const sidebar = document.getElementById('sidebar');
-    menuToggle.addEventListener('click', () => sidebar.classList.toggle('active'));
-
-    // Add Credits Button Logic
-    document.getElementById('addCreditsBtn').addEventListener('click', () => {
-        showToast('Insufficient balance. Complete CPA offers to earn more credits.');
+    document.getElementById('menuToggle').addEventListener('click', () => {
+        document.getElementById('sidebar').classList.toggle('active');
     });
+
+    document.getElementById('addCreditsBtn').addEventListener('click', () => {
+        showToast('Insufficient balance. Complete tasks to earn more credits.');
+    });
+
+    updateCost(); // Initialize cost on load
 });
 
 // Toast Logic
@@ -37,7 +32,7 @@ function showToast(message) {
     setTimeout(() => { toast.classList.remove('show'); }, 3500);
 }
 
-// Custom Model Selector Logic
+// Custom Model Selector
 const selectTrigger = document.getElementById('selectTrigger');
 const selectDropdown = document.getElementById('selectDropdown');
 const modelSearch = document.getElementById('modelSearch');
@@ -46,6 +41,8 @@ const triggerProvider = document.getElementById('triggerProvider');
 const triggerIcon = document.getElementById('triggerIcon');
 const modelItems = document.querySelectorAll('.model-item');
 const durationGroup = document.getElementById('durationGroup');
+const modeGroup = document.getElementById('modeGroup');
+const uploadGroup = document.getElementById('uploadGroup');
 
 selectTrigger.addEventListener('click', (e) => {
     e.stopPropagation();
@@ -71,18 +68,21 @@ modelItems.forEach(item => {
         if (item.dataset.type === 'video') {
             triggerIcon.innerHTML = '<i class="fa-solid fa-film"></i>';
             durationGroup.style.display = 'block';
+            modeGroup.style.display = 'block';
         } else {
             triggerIcon.innerHTML = '<i class="fa-solid fa-image"></i>';
             durationGroup.style.display = 'none';
+            modeGroup.style.display = 'none';
+            uploadGroup.style.display = 'none'; // Hide upload if switching to image
         }
         
-        // Switch tab UI
         const tabBtns = document.querySelectorAll('.tab-btn');
         tabBtns.forEach(t => t.classList.remove('active'));
         document.querySelector(`[data-tab="${item.dataset.type}"]`).classList.add('active');
         
         selectTrigger.classList.remove('active');
         selectDropdown.classList.remove('active');
+        updateCost();
     });
 });
 
@@ -91,37 +91,82 @@ modelSearch.addEventListener('input', (e) => {
     modelItems.forEach(item => {
         const name = item.dataset.name.toLowerCase();
         const provider = item.dataset.provider.toLowerCase();
-        if (name.includes(term) || provider.includes(term)) {
-            item.style.display = 'flex';
-        } else {
-            item.style.display = 'none';
-        }
+        item.style.display = (name.includes(term) || provider.includes(term)) ? 'flex' : 'none';
     });
 });
 
-// Pills selection logic
+// Pills Selection Logic (Generic for all pill groups)
 document.querySelectorAll('.pills').forEach(group => {
     group.addEventListener('click', (e) => {
         if (e.target.classList.contains('pill')) {
             group.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
             e.target.classList.add('active');
+            
+            // Handle Mode Pills (Text to Video / Image to Video)
+            if (group.id === 'modePills') {
+                const mode = e.target.dataset.mode;
+                uploadGroup.style.display = (mode === 'i2v') ? 'block' : 'none';
+            }
+            updateCost();
         }
     });
 });
 
-// Tab switching logic
+// Tab Switching Logic
 const tabs = document.querySelectorAll('.tab-btn');
 tabs.forEach(tab => {
     tab.addEventListener('click', () => {
         tabs.forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
-        
         const firstModel = document.querySelector(`.model-item[data-type="${tab.dataset.tab}"]`);
-        if (firstModel) {
-            firstModel.click(); // Trigger the model click to update UI
-        }
+        if (firstModel) { firstModel.click(); } // Trigger model click to update UI and cost
     });
 });
+
+// Image Upload Preview
+document.getElementById('imgUpload').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            const uploadLabel = document.getElementById('uploadLabel');
+            uploadLabel.innerHTML = `<img src="${event.target.result}" alt="Uploaded"><span>Image ready</span>`;
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
+// Dynamic Cost Calculator
+function calculateCost() {
+    const activeModel = document.querySelector('.model-item.active');
+    if (!activeModel) return 0;
+    
+    const type = activeModel.dataset.type;
+    let cost = parseInt(activeModel.dataset.baseCost);
+    
+    // Resolution Multiplier
+    const resPill = document.querySelector('#resGroup .pill.active');
+    cost += parseInt(resPill.dataset.costMod);
+    
+    if (type === 'video') {
+        // Duration Multiplier
+        const durationPill = document.querySelector('#durationPills .pill.active');
+        cost += parseInt(durationPill.dataset.costMod);
+        
+        // Mode Multiplier (Image to Video costs more)
+        const modePill = document.querySelector('#modePills .pill.active');
+        if (modePill.dataset.mode === 'i2v') {
+            cost += 25; // Extra processing cost
+        }
+    }
+    
+    return cost;
+}
+
+function updateCost() {
+    const cost = calculateCost();
+    document.getElementById('dynamicCost').innerText = cost;
+}
 
 // Generate Logic
 const generateBtn = document.getElementById('generateBtn');
@@ -136,13 +181,14 @@ generateBtn.addEventListener('click', () => {
     if (!savedUser) return;
 
     const user = JSON.parse(savedUser);
-    const cost = 60; // Cost set to 60 to force user to earn credits
+    const cost = calculateCost();
 
     if (user.credits < cost) {
-        addLog('Error: Insufficient credits. Balance: ' + user.credits + '/60', 'error');
+        const needed = cost - user.credits;
+        addLog(`Error: Insufficient credits. Need ${needed} more.`, 'error');
         statusText.innerText = 'Error · Insufficient credits';
         statusText.style.color = 'var(--accent-3)';
-        showToast('Insufficient credits. Please click (+) to earn more.');
+        showToast(`Insufficient credits. You need ${needed} more. Complete tasks to earn.`);
         return;
     }
 
@@ -161,7 +207,7 @@ generateBtn.addEventListener('click', () => {
     statusText.style.color = 'var(--accent-2)';
     
     const activeModel = document.querySelector('.model-item.active');
-    addLog(`> Task started: ${activeModel.dataset.name}`, 'info');
+    addLog(`> Task started: ${activeModel.dataset.name} (Cost: ${cost}cr)`, 'info');
     
     let progress = 0;
     const interval = setInterval(() => {
@@ -183,7 +229,7 @@ function finishGeneration() {
     
     loadingOverlay.classList.remove('active');
     generateBtn.disabled = false;
-    generateBtn.innerHTML = '<i class="fa-solid fa-bolt"></i> Generate (Cost: 60 Credits)';
+    generateBtn.innerHTML = `<i class="fa-solid fa-bolt"></i> Generate (Cost: <span id="dynamicCost">${calculateCost()}</span> Credits)`;
     statusText.innerText = `Idle · Last gen: ${activeModel.dataset.name}`;
     statusText.style.color = 'var(--text-dim)';
 }
