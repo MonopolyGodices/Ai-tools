@@ -37,6 +37,17 @@
         .danger-zone h2 i { color: var(--accent-3); }
         .btn-danger { background: transparent; border: 1px solid var(--accent-3); color: var(--accent-3); padding: 10px 20px; border-radius: 10px; font-weight: 500; cursor: pointer; transition: 0.2s; margin-right: 10px; }
         .btn-danger:hover { background: var(--accent-3); color: #fff; }
+
+        /* Mobile Responsiveness for Settings Page */
+        @media (max-width: 768px) {
+            .settings-card { padding: 20px; }
+            .stats-grid { grid-template-columns: 1fr; gap: 12px; }
+            .stat-box { display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; }
+            .stat-box .val { font-size: 24px; }
+            .stat-box .lbl { margin-top: 0; }
+            .btn-danger { width: 100%; margin-right: 0; margin-bottom: 10px; }
+            .btn-save { width: 100%; justify-content: center; }
+        }
     </style>
 </head>
 <body>
@@ -66,7 +77,7 @@
     </nav>
 
     <div class="dash-container">
-        <!-- Sidebar (Fixed Links) -->
+        <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
             <ul class="side-menu">
                 <li onclick="window.location.href='dashboard.html'"><i class="fa-solid fa-wand-magic-sparkles"></i> Generate</li>
