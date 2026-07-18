@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Console — NEXUS AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+
+    <!-- Top Navigation -->
+    <nav class="dash-nav">
+        <div class="nav-left">
+            <button id="menuToggle" class="menu-btn"><i class="fa-solid fa-bars"></i></button>
+            <a href="index.html" class="logo-back">
+                <div class="logo-mark">N</div>
+                <span>NEXUS</span>
+            </a>
+        </div>
+        
+        <div class="nav-right">
+            <div class="credits-badge">
+                <i class="fa-solid fa-bolt"></i>
+                <span id="userCredits">0</span> Credits
+            </div>
+            <div class="user-info">
+                <span id="userName">User</span>
+                <div class="avatar">U</div>
+                <button id="logoutBtn" class="logout-btn" title="Logout"><i class="fa-solid fa-right-from-bracket"></i></button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="dash-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <ul class="side-menu">
+                <li class="active"><i class="fa-solid fa-wand-magic-sparkles"></i> Generate</li>
+                <li><i class="fa-solid fa-images"></i> Gallery</li>
+                <li><i class="fa-solid fa-gift"></i> Earn Credits</li>
+                <li><i class="fa-solid fa-gear"></i> Settings</li>
+            </ul>
+            <div class="upgrade-card">
+                <h4>Need more power?</h4>
+                <p>Complete tasks or upgrade to Studio Pro for 4K renders.</p>
+                <button class="btn-upgrade">Get Credits</button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="video"><i class="fa-solid fa-film"></i> Video Generation</button>
+                <button class="tab-btn" data-tab="image"><i class="fa-solid fa-image"></i> Image Generation</button>
+            </div>
+
+            <div class="playground-grid">
+                <!-- Left Controls -->
+                <div class="control-panel">
+                    <!-- Model Selector -->
+                    <div class="input-group">
+                        <label>Active Model</label>
+                        <select id="modelSelect" class="dash-input">
+                            <optgroup label="Video Models">
+                                <option>Seedance 2 — ByteDance</option>
+                                <option>Sora 2 — OpenAI</option>
+                                <option>Veo 3 — Google DeepMind</option>
+                                <option>Gemini Omni — Google</option>
+                                <option>Kling 2.5 — Kuaishou</option>
+                                <option>Runway Gen-4 — Runway</option>
+                            </optgroup>
+                            <optgroup label="Image Models">
+                                <option>Nano Banana Pro — Google</option>
+                                <option>Midjourney v7 — Midjourney</option>
+                                <option>Flux 2 Pro — Black Forest Labs</option>
+                                <option>DALL·E 4 — OpenAI</option>
+                                <option>Imagen 4 Ultra — Google</option>
+                                <option>Seedream 3 — ByteDance</option>
+                            </optgroup>
+                        </select>
+                    </div>
+
+                    <!-- Prompt -->
+                    <div class="input-group">
+                        <label>Prompt</label>
+                        <textarea id="promptInput" class="dash-input" rows="4" placeholder="A lone astronaut walking on a salt flat at golden hour, cinematic, 70mm film..."></textarea>
+                    </div>
+
+                    <!-- Aspect Ratio -->
+                    <div class="input-group">
+                        <label>Aspect Ratio</label>
+                        <div class="pills" id="aspectGroup">
+                            <button class="pill active">1:1</button>
+                            <button class="pill">16:9</button>
+                            <button class="pill">9:16</button>
+                            <button class="pill">4:3</button>
+                        </div>
+                    </div>
+
+                    <!-- Resolution -->
+                    <div class="input-group">
+                        <label>Resolution</label>
+                        <div class="pills" id="resGroup">
+                            <button class="pill">720p</button>
+                            <button class="pill active">1080p</button>
+                            <button class="pill">2K</button>
+                            <button class="pill">4K</button>
+                        </div>
+                    </div>
+
+                    <!-- Generate Button -->
+                    <button id="generateBtn" class="btn-generate">
+                        <i class="fa-solid fa-bolt"></i> Generate (Cost: 5 Credits)
+                    </button>
+                </div>
+
+                <!-- Right Preview -->
+                <div class="preview-panel">
+                    <div class="preview-header">
+                        <span class="status-text">Idle · Ready to generate</span>
+                        <div class="preview-actions">
+                            <button class="icon-btn"><i class="fa-solid fa-download"></i></button>
+                            <button class="icon-btn"><i class="fa-solid fa-share"></i></button>
+                        </div>
+                    </div>
+                    <div class="preview-screen" id="previewScreen">
+                        <img id="previewImg" src="https://picsum.photos/seed/nexusai/800/450.jpg" alt="Preview">
+                        <div class="loading-overlay" id="loadingOverlay">
+                            <div class="loader"></div>
+                            <p>Diffusing pixels...</p>
+                        </div>
+                    </div>
+                    <div class="prompt-log" id="promptLog">
+                        <!-- Logs will appear here -->
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="dashboard.js"></script>
+</body>
+</html>
