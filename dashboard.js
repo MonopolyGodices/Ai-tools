@@ -21,26 +21,38 @@ document.addEventListener('DOMContentLoaded', () => {
     const menuToggle = document.getElementById('menuToggle');
     const sidebar = document.getElementById('sidebar');
     menuToggle.addEventListener('click', () => sidebar.classList.toggle('active'));
+
+    // Add Credits Button Logic
+    document.getElementById('addCreditsBtn').addEventListener('click', () => {
+        showToast('Insufficient balance. Complete CPA offers to earn more credits.');
+    });
 });
 
-// ===== CUSTOM MODEL SELECTOR LOGIC =====
+// Toast Logic
+function showToast(message) {
+    const toast = document.getElementById('toast');
+    const toastMsg = document.getElementById('toastMsg');
+    toastMsg.innerText = message;
+    toast.classList.add('show');
+    setTimeout(() => { toast.classList.remove('show'); }, 3500);
+}
+
+// Custom Model Selector Logic
 const selectTrigger = document.getElementById('selectTrigger');
 const selectDropdown = document.getElementById('selectDropdown');
-const selectChevron = document.getElementById('selectChevron');
 const modelSearch = document.getElementById('modelSearch');
 const triggerName = document.getElementById('triggerName');
 const triggerProvider = document.getElementById('triggerProvider');
 const triggerIcon = document.getElementById('triggerIcon');
 const modelItems = document.querySelectorAll('.model-item');
+const durationGroup = document.getElementById('durationGroup');
 
-// Toggle dropdown
 selectTrigger.addEventListener('click', (e) => {
     e.stopPropagation();
     selectTrigger.classList.toggle('active');
     selectDropdown.classList.toggle('active');
 });
 
-// Close dropdown when clicking outside
 document.addEventListener('click', (e) => {
     if (!e.target.closest('#customSelect')) {
         selectTrigger.classList.remove('active');
@@ -48,40 +60,32 @@ document.addEventListener('click', (e) => {
     }
 });
 
-// Select model
 modelItems.forEach(item => {
     item.addEventListener('click', () => {
-        // Remove active from all
         modelItems.forEach(i => i.classList.remove('active'));
         item.classList.add('active');
         
-        // Update trigger
         triggerName.innerText = item.dataset.name;
         triggerProvider.innerText = item.dataset.provider;
         
-        // Update icon based on type
         if (item.dataset.type === 'video') {
             triggerIcon.innerHTML = '<i class="fa-solid fa-film"></i>';
+            durationGroup.style.display = 'block';
         } else {
             triggerIcon.innerHTML = '<i class="fa-solid fa-image"></i>';
+            durationGroup.style.display = 'none';
         }
         
-        // Close dropdown
-        selectTrigger.classList.remove('active');
-        selectDropdown.classList.remove('active');
-        
-        // Switch tab if needed
+        // Switch tab UI
         const tabBtns = document.querySelectorAll('.tab-btn');
         tabBtns.forEach(t => t.classList.remove('active'));
-        if (item.dataset.type === 'video') {
-            document.querySelector('[data-tab="video"]').classList.add('active');
-        } else {
-            document.querySelector('[data-tab="image"]').classList.add('active');
-        }
+        document.querySelector(`[data-tab="${item.dataset.type}"]`).classList.add('active');
+        
+        selectTrigger.classList.remove('active');
+        selectDropdown.classList.remove('active');
     });
 });
 
-// Search functionality
 modelSearch.addEventListener('input', (e) => {
     const term = e.target.value.toLowerCase();
     modelItems.forEach(item => {
@@ -95,27 +99,26 @@ modelSearch.addEventListener('input', (e) => {
     });
 });
 
-// Pills selection
-const pills = document.querySelectorAll('.pill');
-pills.forEach(pill => {
-    pill.addEventListener('click', () => {
-        const parent = pill.parentElement;
-        parent.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
-        pill.classList.add('active');
+// Pills selection logic
+document.querySelectorAll('.pills').forEach(group => {
+    group.addEventListener('click', (e) => {
+        if (e.target.classList.contains('pill')) {
+            group.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+            e.target.classList.add('active');
+        }
     });
 });
 
-// Tab switching
+// Tab switching logic
 const tabs = document.querySelectorAll('.tab-btn');
 tabs.forEach(tab => {
     tab.addEventListener('click', () => {
         tabs.forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
         
-        // Auto-select first model of that type
         const firstModel = document.querySelector(`.model-item[data-type="${tab.dataset.tab}"]`);
         if (firstModel) {
-            firstModel.click();
+            firstModel.click(); // Trigger the model click to update UI
         }
     });
 });
@@ -126,33 +129,39 @@ const loadingOverlay = document.getElementById('loadingOverlay');
 const previewImg = document.getElementById('previewImg');
 const promptLog = document.getElementById('promptLog');
 const statusText = document.querySelector('.status-text');
+const emptyState = document.getElementById('emptyState');
 
 generateBtn.addEventListener('click', () => {
     const savedUser = localStorage.getItem('nexusUser');
     if (!savedUser) return;
 
     const user = JSON.parse(savedUser);
-    const cost = 5;
+    const cost = 60; // Cost set to 60 to force user to earn credits
 
     if (user.credits < cost) {
-        addLog('Error: Insufficient credits. Please complete tasks to earn more.', 'error');
+        addLog('Error: Insufficient credits. Balance: ' + user.credits + '/60', 'error');
         statusText.innerText = 'Error · Insufficient credits';
         statusText.style.color = 'var(--accent-3)';
+        showToast('Insufficient credits. Please click (+) to earn more.');
         return;
     }
 
+    // Deduct credits
     user.credits -= cost;
     localStorage.setItem('nexusUser', JSON.stringify(user));
     document.getElementById('userCredits').innerText = user.credits;
 
+    // Start Generation
     generateBtn.disabled = true;
     generateBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generating...';
+    emptyState.style.display = 'none';
+    previewImg.style.display = 'block';
     loadingOverlay.classList.add('active');
     statusText.innerText = 'Processing...';
     statusText.style.color = 'var(--accent-2)';
     
     const activeModel = document.querySelector('.model-item.active');
-    addLog(`> Task started: ${activeModel.dataset.name} (${activeModel.dataset.provider})`, 'info');
+    addLog(`> Task started: ${activeModel.dataset.name}`, 'info');
     
     let progress = 0;
     const interval = setInterval(() => {
@@ -174,7 +183,7 @@ function finishGeneration() {
     
     loadingOverlay.classList.remove('active');
     generateBtn.disabled = false;
-    generateBtn.innerHTML = '<i class="fa-solid fa-bolt"></i> Generate (Cost: 5 Credits)';
+    generateBtn.innerHTML = '<i class="fa-solid fa-bolt"></i> Generate (Cost: 60 Credits)';
     statusText.innerText = `Idle · Last gen: ${activeModel.dataset.name}`;
     statusText.style.color = 'var(--text-dim)';
 }
