@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NEXUS — The 2026 AI Generation Atlas | Video & Image Models</title>
+    <meta name="description" content="The definitive July 2026 hub for AI video generation and image synthesis. Sora 2, Veo 3, Seedance 2, Kling 2.5, Midjourney v7, Flux 2 Pro. Start generating with free credits.">
+    <meta name="keywords" content="AI video generation, AI image generation, Sora 2, Veo 3, Seedance 2, Midjourney v7, Flux 2 Pro, generative AI 2026, text-to-video AI, AI art generator">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <div class="logo-mark">N</div>
+                <span>NEXUS</span>
+            </a>
+            
+            <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+            
+            <div class="nav-links" id="navLinks">
+                <a href="#features">Features</a>
+                <a href="#models">Models</a>
+                <a href="#credits">Credits</a>
+                <a href="auth.html" class="btn-signin">Sign In</a>
+                <a href="auth.html" class="btn-get-started">Get Started <i class="fa-solid fa-arrow-right"></i></a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="hero">
+        <canvas id="heroCanvas"></canvas>
+        <div class="hero-content">
+            <div class="badge-hero">
+                <span class="dot-live"></span> July 2026 Release Wave
+            </div>
+            <h1 class="hero-title">
+                Every model.<br>
+                <span class="gradient-text">One canvas.</span><br>
+                Zero limits.
+            </h1>
+            <p class="hero-subtitle">
+                The definitive 2026 atlas for AI video generation and image synthesis. Sora 2, Veo 3, Seedance 2, Midjourney v7, and 50+ frontier models — unified under one professional interface.
+            </p>
+            <div class="hero-actions">
+                <a href="auth.html" class="btn-primary">
+                    Start Generating <i class="fa-solid fa-arrow-right"></i>
+                </a>
+                <a href="#models" class="btn-secondary">
+                    Explore Models
+                </a>
+            </div>
+            
+            <div class="hero-stats">
+                <div class="stat-item">
+                    <span class="stat-num" data-count="52">0</span>
+                    <span class="stat-label">Models Online</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <span class="stat-num" data-count="8">0</span>
+                    <span class="stat-label">K Resolution</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <span class="stat-num" data-count="60">0</span>
+                    <span class="stat-label">Sec Video Max</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Features / SEO Section -->
+    <section id="features" class="section-spacing">
+        <div class="container">
+            <div class="section-header">
+                <span class="label">01 / The Platform</span>
+                <h2 class="section-title">Built for <span class="gradient-text">creators.</span></h2>
+            </div>
+            
+            <div class="features-grid">
+                <div class="feature-card reveal">
+                    <i class="fa-solid fa-film feature-icon"></i>
+                    <h3>Video Generation</h3>
+                    <p>Cinema-grade text-to-video and image-to-video. Sora 2, Seedance 2, and Veo 3 at up to 4K 60fps with native audio.</p>
+                </div>
+                <div class="feature-card reveal">
+                    <i class="fa-solid fa-image feature-icon"></i>
+                    <h3>Image Synthesis</h3>
+                    <p>From Midjourney v7's painterly soul to Flux 2 Pro's photonic precision. Generate, upscale, and edit in one canvas.</p>
+                </div>
+                <div class="feature-card reveal">
+                    <i class="fa-solid fa-sliders feature-icon"></i>
+                    <h3>Pro Controls</h3>
+                    <p>Granular seeds, CFG scales, negative prompts, and camera trajectories. Reproducible results every single time.</p>
+                </div>
+                <div class="feature-card reveal">
+                    <i class="fa-solid fa-bolt feature-icon"></i>
+                    <h3>Unified Billing</h3>
+                    <p>Stop juggling API keys. One subscription, one credit pool, access to every frontier model in our atlas.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Models Marquee -->
+    <section id="models" class="marquee-section">
+        <div class="marquee">
+            <div class="marquee-track">
+                <span class="display-text">Seedance 2</span><span class="separator">/</span>
+                <span class="display-text">Sora 2</span><span class="separator">/</span>
+                <span class="display-text">Veo 3</span><span class="separator">/</span>
+                <span class="display-text">Midjourney v7</span><span class="separator">/</span>
+                <span class="display-text">Flux 2 Pro</span><span class="separator">/</span>
+                <span class="display-text">Kling 2.5</span><span class="separator">/</span>
+                <span class="display-text">Runway Gen-4</span><span class="separator">/</span>
+                <span class="display-text">DALL·E 4</span><span class="separator">/</span>
+                <!-- Duplicate for seamless loop -->
+                <span class="display-text">Seedance 2</span><span class="separator">/</span>
+                <span class="display-text">Sora 2</span><span class="separator">/</span>
+                <span class="display-text">Veo 3</span><span class="separator">/</span>
+                <span class="display-text">Midjourney v7</span><span class="separator">/</span>
+                <span class="display-text">Flux 2 Pro</span><span class="separator">/</span>
+                <span class="display-text">Kling 2.5</span><span class="separator">/</span>
+                <span class="display-text">Runway Gen-4</span><span class="separator">/</span>
+                <span class="display-text">DALL·E 4</span><span class="separator">/</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Credits System Explanation -->
+    <section id="credits" class="section-spacing dark-bg">
+        <div class="container">
+            <div class="credits-wrapper">
+                <div class="section-header text-center reveal">
+                    <span class="label">02 / How It Works</span>
+                    <h2 class="section-title">Generate freely. <span class="gradient-text">Earn more.</span></h2>
+                    <p class="section-desc">Start with free daily credits. Need more? Complete quick partner tasks or upgrade to Studio Pro for unlimited scale.</p>
+                </div>
+
+                <div class="credits-grid">
+                    <div class="credit-card reveal">
+                        <div class="credit-icon"><i class="fa-solid fa-gift"></i></div>
+                        <h4>Daily Free Credits</h4>
+                        <p>Every account receives 50 free generation credits daily. Perfect for testing Sora 2 or Midjourney v7.</p>
+                    </div>
+                    <div class="credit-card reveal">
+                        <div class="credit-icon"><i class="fa-solid fa-list-check"></i></div>
+                        <h4>Earn via Tasks</h4>
+                        <p>Complete partner offers (CPA network) to earn massive credit bundles. No payment required.</p>
+                    </div>
+                    <div class="credit-card reveal">
+                        <div class="credit-icon"><i class="fa-solid fa-rocket"></i></div>
+                        <h4>Go Unlimited</h4>
+                        <p>Upgrade to Enterprise for dedicated GPU pools, 8K renders, and zero credit limits.</p>
+                    </div>
+                </div>
+
+                <div class="cta-center reveal">
+                    <a href="auth.html" class="btn-primary btn-large">
+                        Claim Your Free Credits <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <a href="index.html" class="logo">
+                        <div class="logo-mark">N</div>
+                        <span>NEXUS</span>
+                    </a>
+                    <p>The 2026 AI Generation Atlas. Every frontier video and image model unified.</p>
+                </div>
+                <div class="footer-col">
+                    <h5>Models</h5>
+                    <a href="#">Video AI</a>
+                    <a href="#">Image AI</a>
+                    <a href="#">Audio AI</a>
+                </div>
+                <div class="footer-col">
+                    <h5>Company</h5>
+                    <a href="#">About</a>
+                    <a href="#">Privacy</a>
+                    <a href="#">Terms</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2026 NEXUS Atlas Labs. All rights reserved.</p>
+                <div class="seo-keywords">
+                    <span>AI video generation</span> · <span>Sora 2</span> · <span>Veo 3</span> · <span>Seedance 2</span> · <span>Midjourney v7</span> · <span>Flux 2 Pro</span> · <span>text-to-video AI</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+  </html>
