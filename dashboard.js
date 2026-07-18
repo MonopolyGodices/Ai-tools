@@ -16,8 +16,9 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('sidebar').classList.toggle('active');
     });
 
+    // Redirect + button to tasks page
     document.getElementById('addCreditsBtn').addEventListener('click', () => {
-        showToast('Insufficient balance. Complete tasks to earn more credits.');
+        window.location.href = 'tasks.html';
     });
 
     updateCost(); // Initialize cost on load
@@ -73,7 +74,7 @@ modelItems.forEach(item => {
             triggerIcon.innerHTML = '<i class="fa-solid fa-image"></i>';
             durationGroup.style.display = 'none';
             modeGroup.style.display = 'none';
-            uploadGroup.style.display = 'none'; // Hide upload if switching to image
+            uploadGroup.style.display = 'none';
         }
         
         const tabBtns = document.querySelectorAll('.tab-btn');
@@ -95,14 +96,13 @@ modelSearch.addEventListener('input', (e) => {
     });
 });
 
-// Pills Selection Logic (Generic for all pill groups)
+// Pills Selection Logic
 document.querySelectorAll('.pills').forEach(group => {
     group.addEventListener('click', (e) => {
         if (e.target.classList.contains('pill')) {
             group.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
             e.target.classList.add('active');
             
-            // Handle Mode Pills (Text to Video / Image to Video)
             if (group.id === 'modePills') {
                 const mode = e.target.dataset.mode;
                 uploadGroup.style.display = (mode === 'i2v') ? 'block' : 'none';
@@ -119,7 +119,7 @@ tabs.forEach(tab => {
         tabs.forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
         const firstModel = document.querySelector(`.model-item[data-type="${tab.dataset.tab}"]`);
-        if (firstModel) { firstModel.click(); } // Trigger model click to update UI and cost
+        if (firstModel) { firstModel.click(); }
     });
 });
 
@@ -144,19 +144,16 @@ function calculateCost() {
     const type = activeModel.dataset.type;
     let cost = parseInt(activeModel.dataset.baseCost);
     
-    // Resolution Multiplier
     const resPill = document.querySelector('#resGroup .pill.active');
     cost += parseInt(resPill.dataset.costMod);
     
     if (type === 'video') {
-        // Duration Multiplier
         const durationPill = document.querySelector('#durationPills .pill.active');
         cost += parseInt(durationPill.dataset.costMod);
         
-        // Mode Multiplier (Image to Video costs more)
         const modePill = document.querySelector('#modePills .pill.active');
         if (modePill.dataset.mode === 'i2v') {
-            cost += 25; // Extra processing cost
+            cost += 25;
         }
     }
     
@@ -176,7 +173,9 @@ const promptLog = document.getElementById('promptLog');
 const statusText = document.querySelector('.status-text');
 const emptyState = document.getElementById('emptyState');
 
-generateBtn.addEventListener('click', () => {
+generateBtn.addEventListener('click', handleGenerate);
+
+function handleGenerate() {
     const savedUser = localStorage.getItem('nexusUser');
     if (!savedUser) return;
 
@@ -188,7 +187,18 @@ generateBtn.addEventListener('click', () => {
         addLog(`Error: Insufficient credits. Need ${needed} more.`, 'error');
         statusText.innerText = 'Error · Insufficient credits';
         statusText.style.color = 'var(--accent-3)';
-        showToast(`Insufficient credits. You need ${needed} more. Complete tasks to earn.`);
+        
+        // Change Generate Button to "Get Free Credits"
+        generateBtn.innerHTML = '<i class="fa-solid fa-gift"></i> Get 100 Free Credits';
+        generateBtn.style.background = 'var(--accent-3)';
+        generateBtn.style.color = '#fff';
+        generateBtn.style.border = 'none';
+        
+        // Remove original click event and add redirect event
+        generateBtn.removeEventListener('click', handleGenerate);
+        generateBtn.addEventListener('click', goToTasks);
+        
+        showToast(`Insufficient credits. You need ${needed} more. Earn free credits now!`);
         return;
     }
 
@@ -218,7 +228,11 @@ generateBtn.addEventListener('click', () => {
             finishGeneration();
         }
     }, 400);
-});
+}
+
+function goToTasks() {
+    window.location.href = 'tasks.html';
+}
 
 function finishGeneration() {
     const activeModel = document.querySelector('.model-item.active');
@@ -228,7 +242,7 @@ function finishGeneration() {
     const imgUrl = `https://picsum.photos/seed/nexus${seed}/800/450.jpg`;
     previewImg.src = imgUrl;
     
-    // Save to Gallery History (Local Storage)
+    // Save to Gallery History
     const newAsset = {
         id: Date.now(),
         url: imgUrl,
@@ -238,12 +252,20 @@ function finishGeneration() {
     };
     
     let history = JSON.parse(localStorage.getItem('nexusHistory') || '[]');
-    history.unshift(newAsset); // Add to the beginning of the array
+    history.unshift(newAsset);
     localStorage.setItem('nexusHistory', JSON.stringify(history));
     
     loadingOverlay.classList.remove('active');
     generateBtn.disabled = false;
+    
+    // Restore original Generate button
     generateBtn.innerHTML = `<i class="fa-solid fa-bolt"></i> Generate (Cost: <span id="dynamicCost">${calculateCost()}</span> Credits)`;
+    generateBtn.style.background = 'var(--text)';
+    generateBtn.style.color = 'var(--bg)';
+    
+    generateBtn.removeEventListener('click', goToTasks);
+    generateBtn.addEventListener('click', handleGenerate);
+    
     statusText.innerText = `Idle · Last gen: ${activeModel.dataset.name}`;
     statusText.style.color = 'var(--text-dim)';
 }
