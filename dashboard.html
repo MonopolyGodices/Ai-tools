@@ -43,18 +43,18 @@
     </nav>
 
     <div class="dash-container">
-        <!-- Sidebar -->
+        <!-- Sidebar (Fixed Links) -->
         <aside class="sidebar" id="sidebar">
             <ul class="side-menu">
-                <li class="active"><i class="fa-solid fa-wand-magic-sparkles"></i> Generate</li>
-                <li><i class="fa-solid fa-images"></i> Gallery</li>
-                <li><i class="fa-solid fa-gift"></i> Earn Credits</li>
-                <li><i class="fa-solid fa-gear"></i> Settings</li>
+                <li class="active" onclick="window.location.href='dashboard.html'"><i class="fa-solid fa-wand-magic-sparkles"></i> Generate</li>
+                <li onclick="window.location.href='gallery.html'"><i class="fa-solid fa-images"></i> Gallery</li>
+                <li onclick="window.location.href='tasks.html'"><i class="fa-solid fa-gift"></i> Earn Credits</li>
+                <li onclick="window.location.href='settings.html'"><i class="fa-solid fa-gear"></i> Settings</li>
             </ul>
             <div class="upgrade-card">
                 <h4>Need more power?</h4>
                 <p>Complete tasks or upgrade to Studio Pro for 4K renders.</p>
-                <button class="btn-upgrade" onclick="showToast('Task system coming soon!')">Get Credits</button>
+                <button class="btn-upgrade" onclick="window.location.href='tasks.html'">Get Credits</button>
             </div>
         </aside>
 
