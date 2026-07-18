@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Earn Credits — NEXUS AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="dashboard.css">
+    <style>
+        .tasks-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
+        .task-card {
+            background: var(--surface); border: 1px solid var(--border); border-radius: 20px;
+            padding: 28px; text-align: center; transition: 0.3s; display: flex; flex-direction: column;
+        }
+        .task-card:hover { border-color: var(--border-strong); transform: translateY(-4px); }
+        .task-icon {
+            width: 60px; height: 60px; margin: 0 auto 20px; border-radius: 50%;
+            background: rgba(255, 61, 0, 0.1); color: var(--accent);
+            display: flex; align-items: center; justify-content: center; font-size: 24px;
+        }
+        .task-title { font-size: 18px; margin-bottom: 8px; }
+        .task-desc { color: var(--text-dim); font-size: 14px; margin-bottom: 20px; flex-grow: 1; }
+        .task-reward {
+            font-family: 'Instrument Serif', serif; font-style: italic; font-size: 42px;
+            color: var(--accent-2); margin-bottom: 20px; line-height: 1;
+        }
+        .task-reward span { font-size: 16px; color: var(--text-dim); font-family: var(--mono); font-style: normal; }
+        
+        .task-progress { height: 6px; background: var(--bg-2); border-radius: 3px; margin-bottom: 16px; overflow: hidden; }
+        .task-progress-bar { height: 100%; background: var(--accent); width: 0%; transition: width 1s linear; }
+        
+        .task-timer { font-family: var(--mono); font-size: 12px; color: var(--text-dim); margin-bottom: 16px; height: 18px; }
+        .task-timer.failed { color: var(--accent-3); }
+        .task-timer.verifying { color: var(--accent-2); }
+        
+        .btn-task {
+            width: 100%; padding: 12px; border-radius: 10px; border: none; cursor: pointer;
+            font-weight: 500; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-task.start { background: var(--text); color: var(--bg); }
+        .btn-task.start:hover { background: var(--accent); color: #fff; }
+        .btn-task.claim { background: var(--green); color: #000; }
+        .btn-task.claim:hover { transform: scale(1.02); }
+        .btn-task.disabled { background: var(--surface-2); color: var(--text-faint); cursor: not-allowed; pointer-events: none; }
+        .btn-task.loading { background: var(--surface-2); color: var(--text-dim); pointer-events: none; }
+    </style>
+</head>
+<body>
+
+    <!-- Top Navigation -->
+    <nav class="dash-nav">
+        <div class="nav-left">
+            <button id="menuToggle" class="menu-btn"><i class="fa-solid fa-bars"></i></button>
+            <a href="index.html" class="logo-back">
+                <div class="logo-mark">N</div>
+                <span>NEXUS</span>
+            </a>
+        </div>
+        
+        <div class="nav-right">
+            <div class="credits-badge">
+                <i class="fa-solid fa-bolt"></i>
+                <span id="userCredits">0</span>
+            </div>
+            <button id="addCreditsBtn" class="add-credits-btn" title="Buy Credits"><i class="fa-solid fa-plus"></i></button>
+            <div class="user-info">
+                <span id="userName">User</span>
+                <div class="avatar">U</div>
+                <button id="logoutBtn" class="logout-btn" title="Logout"><i class="fa-solid fa-right-from-bracket"></i></button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="dash-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <ul class="side-menu">
+                <li onclick="window.location.href='dashboard.html'"><i class="fa-solid fa-wand-magic-sparkles"></i> Generate</li>
+                <li onclick="window.location.href='gallery.html'"><i class="fa-solid fa-images"></i> Gallery</li>
+                <li class="active"><i class="fa-solid fa-gift"></i> Earn Credits</li>
+                <li onclick="window.location.href='settings.html'"><i class="fa-solid fa-gear"></i> Settings</li>
+            </ul>
+            <div class="upgrade-card">
+                <h4>Need more power?</h4>
+                <p>Complete tasks or upgrade to Studio Pro for 4K renders.</p>
+                <button class="btn-upgrade" onclick="showToast('Pricing plans coming soon!')">Get Credits</button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div style="margin-bottom: 32px;">
+                <h1 style="font-family: 'Instrument Serif', serif; font-style: italic; font-size: 2.5rem;">Earn Free Credits</h1>
+                <p style="color: var(--text-dim); font-size: 14px; max-width: 600px;">Complete sponsored tasks and offers to earn generation credits. Tasks are strictly verified to ensure completion.</p>
+            </div>
+
+            <div class="tasks-grid">
+                <!-- Task 1 -->
+                <div class="task-card">
+                    <div class="task-icon"><i class="fa-solid fa-coins"></i></div>
+                    <h3 class="task-title">Quick Task</h3>
+                    <p class="task-desc">Complete 1 sponsored offer to unlock 50 credits instantly.</p>
+                    <div class="task-reward">50 <span>CREDITS</span></div>
+                    <div class="task-progress"><div class="task-progress-bar" id="bar-1"></div></div>
+                    <div class="task-timer" id="timer-1">Ready to start</div>
+                    <button class="btn-task start" data-task-id="1" data-duration="60" data-reward="50" data-url="YOUR_OGADS_LINK_1">
+                        <i class="fa-solid fa-play"></i> Start Task
+                    </button>
+                </div>
+
+                <!-- Task 2 -->
+                <div class="task-card">
+                    <div class="task-icon"><i class="fa-solid fa-gem"></i></div>
+                    <h3 class="task-title">Double Offer</h3>
+                    <p class="task-desc">Complete 2 sponsored offers. Takes a bit more time, but rewards more.</p>
+                    <div class="task-reward">70 <span>CREDITS</span></div>
+                    <div class="task-progress"><div class="task-progress-bar" id="bar-2"></div></div>
+                    <div class="task-timer" id="timer-2">Ready to start</div>
+                    <button class="btn-task start" data-task-id="2" data-duration="120" data-reward="70" data-url="YOUR_OGADS_LINK_2">
+                        <i class="fa-solid fa-play"></i> Start Task
+                    </button>
+                </div>
+
+                <!-- Task 3 -->
+                <div class="task-card">
+                    <div class="task-icon"><i class="fa-solid fa-trophy"></i></div>
+                    <h3 class="task-title">Triple Offer</h3>
+                    <p class="task-desc">Complete 3 sponsored offers for the maximum free credit reward.</p>
+                    <div class="task-reward">100 <span>CREDITS</span></div>
+                    <div class="task-progress"><div class="task-progress-bar" id="bar-3"></div></div>
+                    <div class="task-timer" id="timer-3">Ready to start</div>
+                    <button class="btn-task start" data-task-id="3" data-duration="180" data-reward="100" data-url="YOUR_OGADS_LINK_3">
+                        <i class="fa-solid fa-play"></i> Start Task
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+        <i class="fa-solid fa-circle-info"></i>
+        <span id="toastMsg">Message</span>
+    </div>
+
+    <script src="tasks.js"></script>
+</body>
+</html>
