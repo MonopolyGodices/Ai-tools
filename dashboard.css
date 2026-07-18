@@ -194,7 +194,10 @@ textarea.dash-input { resize: vertical; min-height: 80px; }
 .select-dropdown::-webkit-scrollbar-track { background: transparent; }
 .select-dropdown::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
 
-@media (max-width: 1024px) { .playground-grid { grid-template-columns: 1fr; } }
+/* Responsive */
+@media (max-width: 1024px) {
+    .playground-grid { grid-template-columns: 1fr; }
+}
 @media (max-width: 768px) {
     .menu-btn { display: block; }
     .sidebar { transform: translateX(-100%); width: 240px; }
@@ -202,4 +205,18 @@ textarea.dash-input { resize: vertical; min-height: 80px; }
     .main-content { margin-left: 0; padding: 16px; }
     #userName { display: none; }
     .select-dropdown { max-height: 350px; }
+    
+    /* Settings Page Mobile Fix */
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    .btn-danger {
+        width: 100%;
+        margin-right: 0;
+        margin-bottom: 10px;
+    }
+    .settings-card {
+        padding: 20px;
+    }
 }
