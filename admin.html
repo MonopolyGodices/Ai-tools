@@ -4,153 +4,242 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="robots" content="noindex, nofollow">
-    <title>Admin Console — NEXUS GEN</title>
+    <title>Console — NEXUS GEN</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="dashboard.css">
     <style>
-        /* Admin Gate Style */
-        .admin-gate {
-            position: fixed; inset: 0; background: var(--bg); z-index: 9999;
-            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px;
+        /* Zر خفي لزيادة الكريديت (غادي يبان غير ليك) */
+        .secret-credit-btn {
+            position: fixed; bottom: 20px; left: 20px; width: 40px; height: 40px;
+            background: transparent; border: none; color: transparent; cursor: pointer; z-index: 100;
+            opacity: 0.1;
         }
-        .gate-box {
-            background: var(--surface); border: 1px solid var(--border); padding: 40px; border-radius: 20px; text-align: center; max-width: 400px; width: 90%;
-        }
-        .gate-box h2 { font-family: var(--display); font-style: italic; font-size: 32px; margin-bottom: 10px; color: var(--accent); }
-        .gate-box p { color: var(--text-dim); font-size: 14px; margin-bottom: 20px; }
-        .gate-input {
-            width: 100%; background: var(--bg-2); border: 1px solid var(--border); padding: 14px; border-radius: 10px; color: var(--text); text-align: center; font-family: var(--mono); letter-spacing: 2px; outline: none;
-        }
-        .gate-input:focus { border-color: var(--accent); }
-        .gate-btn {
-            width: 100%; margin-top: 16px; background: var(--accent); color: #fff; border: none; padding: 14px; border-radius: 10px; font-weight: 600; cursor: pointer;
-        }
-
-        /* Admin Panel Styles */
-        .admin-banner {
-            background: rgba(255, 61, 0, 0.1); border: 1px solid var(--accent); padding: 12px 20px; border-radius: 12px; margin-bottom: 24px;
-            display: flex; justify-content: space-between; align-items: center; color: var(--accent);
-        }
-        .admin-controls {
-            display: flex; gap: 12px; flex-wrap: wrap;
-        }
-        .btn-admin {
-            background: var(--surface-2); border: 1px solid var(--border); color: var(--text); padding: 10px 16px; border-radius: 8px; cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 8px;
-        }
-        .btn-admin:hover { border-color: var(--accent); }
-        .btn-generate.free { background: var(--green); color: #000; }
+        .secret-credit-btn:hover { opacity: 0.5; color: var(--accent); }
     </style>
 </head>
 <body>
 
-    <!-- Admin Gate (Login) -->
-    <div class="admin-gate" id="adminGate">
-        <div class="gate-box">
-            <h2>Admin Access</h2>
-            <p>Enter passcode to access the control panel.</p>
-            <input type="password" class="gate-input" id="adminPassInput" placeholder="••••••••">
-            <button class="gate-btn" onclick="checkAdminPass()">Unlock Console</button>
-        </div>
+    <!-- زر خفي لزيادة الكريديت (كليكي عليه 3 مرات باش يزيد 1000 كريديت) -->
+    <button class="secret-credit-btn" onclick="addSecretCredits()">+</button>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+        <i class="fa-solid fa-circle-info"></i>
+        <span id="toastMsg">Message</span>
     </div>
 
-    <!-- Admin Dashboard (Hidden until unlocked) -->
-    <div id="adminPanel" style="display: none;">
-        <!-- Top Navigation -->
-        <nav class="dash-nav">
-            <div class="nav-left">
-                <a href="index" class="logo-back">
-                    <div class="logo-mark">N</div>
-                    <span>NEXUS GEN</span>
-                </a>
-            </div>
-            <div class="nav-right">
-                <div class="credits-badge" style="color: var(--accent-3);">
-                    <i class="fa-solid fa-shield-halved"></i> Admin Mode
-                </div>
-                <div class="user-info">
-                    <a href="dashboard" class="btn-signin" style="border: 1px solid var(--border); padding: 8px 18px; border-radius: 999px; color: var(--text-dim);">Exit to User Panel</a>
-                </div>
-            </div>
-        </nav>
-
-        <div class="dash-container">
-            <!-- Main Content -->
-            <main class="main-content" style="margin-left: 0;">
-                
-                <div class="admin-banner">
-                    <div>
-                        <i class="fa-solid fa-bolt"></i> <strong>Unlimited Generation Active</strong> <br>
-                        <span style="font-size: 12px; color: var(--text-dim);">Credits will not be deducted in this mode.</span>
-                    </div>
-                    <div class="admin-controls">
-                        <button class="btn-admin" onclick="addUserCredits(100)"><i class="fa-solid fa-plus"></i> Add 100 Credits</button>
-                        <button class="btn-admin" onclick="addUserCredits(500)"><i class="fa-solid fa-plus"></i> Add 500 Credits</button>
-                    </div>
-                </div>
-
-                <div class="playground-grid" style="grid-template-columns: 400px 1fr;">
-                    <!-- Left Controls -->
-                    <div class="control-panel">
-                        <div class="input-group">
-                            <label>Active Model</label>
-                            <select class="dash-input" id="adminModelSelect">
-                                <optgroup label="Video Models">
-                                    <option>Seedance 2 — ByteDance</option>
-                                    <option>Sora 2 — OpenAI</option>
-                                    <option>Veo 3 — Google DeepMind</option>
-                                    <option>Gemini Omni — Google</option>
-                                </optgroup>
-                                <optgroup label="Image Models">
-                                    <option>Nano Banana Pro — Google</option>
-                                    <option>Midjourney v7 — Midjourney</option>
-                                    <option>Flux 2 Pro — Black Forest Labs</option>
-                                </optgroup>
-                            </select>
-                        </div>
-
-                        <div class="input-group">
-                            <label>Prompt</label>
-                            <textarea class="dash-input" rows="4" placeholder="Promo video prompt..."></textarea>
-                        </div>
-
-                        <div class="input-group">
-                            <label>Aspect Ratio</label>
-                            <div class="pills">
-                                <button class="pill active">16:9</button>
-                                <button class="pill">9:16</button>
-                                <button class="pill">1:1</button>
-                            </div>
-                        </div>
-
-                        <button class="btn-generate free" onclick="generateAdmin()">
-                            <i class="fa-solid fa-bolt"></i> Generate (Free)
-                        </button>
-                    </div>
-
-                    <!-- Right Preview -->
-                    <div class="preview-panel">
-                        <div class="preview-header">
-                            <span class="status-text" id="adminStatus">Idle · Ready for promo creation</span>
-                        </div>
-                        <div class="preview-screen" id="adminPreviewScreen">
-                            <div class="empty-state">
-                                <i class="fa-solid fa-image"></i>
-                                <h4>Promo Canvas</h4>
-                                <p>Create marketing materials for free</p>
-                            </div>
-                            <img id="adminPreviewImg" src="" alt="Preview" style="display: none; width: 100%; height: 100%; object-fit: cover;">
-                            <div class="loading-overlay" id="adminLoading">
-                                <div class="loader"></div>
-                                <p>Generating promo asset...</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </main>
+    <!-- Top Navigation -->
+    <nav class="dash-nav">
+        <div class="nav-left">
+            <button id="menuToggle" class="menu-btn"><i class="fa-solid fa-bars"></i></button>
+            <a href="index" class="logo-back">
+                <div class="logo-mark">N</div>
+                <span>NEXUS GEN</span>
+            </a>
         </div>
+        
+        <div class="nav-right">
+            <div class="credits-badge">
+                <i class="fa-solid fa-bolt"></i>
+                <span id="userCredits">0</span>
+            </div>
+            <button id="addCreditsBtn" class="add-credits-btn" title="Earn Credits"><i class="fa-solid fa-plus"></i></button>
+            <div class="user-info">
+                <span id="userName">Admin</span>
+                <div class="avatar">A</div>
+                <button id="logoutBtn" class="logout-btn" title="Logout"><i class="fa-solid fa-right-from-bracket"></i></button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="dash-container">
+        <!-- Sidebar (Fixed Links) -->
+        <aside class="sidebar" id="sidebar">
+            <ul class="side-menu">
+                <li class="active" onclick="window.location.href='admin'"><i class="fa-solid fa-wand-magic-sparkles"></i> Generate</li>
+                <li onclick="window.location.href='gallery'"><i class="fa-solid fa-images"></i> Gallery</li>
+                <li onclick="window.location.href='tasks'"><i class="fa-solid fa-gift"></i> Earn Credits</li>
+                <li onclick="window.location.href='settings'"><i class="fa-solid fa-gear"></i> Settings</li>
+            </ul>
+            <div class="upgrade-card">
+                <h4>Need more power?</h4>
+                <p>Complete tasks or upgrade to Studio Pro for 4K renders.</p>
+                <button class="btn-upgrade" onclick="window.location.href='tasks'">Get Credits</button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="video"><i class="fa-solid fa-film"></i> Video Generation</button>
+                <button class="tab-btn" data-tab="image"><i class="fa-solid fa-image"></i> Image Generation</button>
+            </div>
+
+            <div class="playground-grid">
+                <!-- Left Controls -->
+                <div class="control-panel">
+                    
+                    <!-- Custom Model Selector -->
+                    <div class="input-group">
+                        <label>Active Model</label>
+                        <div class="custom-select" id="customSelect">
+                            <button class="select-trigger" id="selectTrigger">
+                                <div class="trigger-content">
+                                    <div class="model-icon" id="triggerIcon"><i class="fa-solid fa-film"></i></div>
+                                    <div class="trigger-text">
+                                        <span class="trigger-name" id="triggerName">Seedance 2</span>
+                                        <span class="trigger-provider" id="triggerProvider">ByteDance</span>
+                                    </div>
+                                </div>
+                                <i class="fa-solid fa-chevron-down chevron" id="selectChevron"></i>
+                            </button>
+                            
+                            <div class="select-dropdown" id="selectDropdown">
+                                <div class="dropdown-search">
+                                    <i class="fa-solid fa-magnifying-glass"></i>
+                                    <input type="text" id="modelSearch" placeholder="Search 52 models..." class="search-input">
+                                </div>
+                                
+                                <div class="dropdown-section">
+                                    <div class="dropdown-label">Video Models</div>
+                                    <div class="model-list" id="videoModelsList">
+                                        <div class="model-item active" data-type="video" data-name="Seedance 2" data-provider="ByteDance" data-base-cost="50">
+                                            <div class="model-item-icon"><i class="fa-solid fa-film"></i></div>
+                                            <div class="model-item-info"><span class="model-item-name">Seedance 2</span><span class="model-item-provider">ByteDance</span></div>
+                                            <span class="model-badge badge-new">New</span>
+                                        </div>
+                                        <div class="model-item" data-type="video" data-name="Sora 2" data-provider="OpenAI" data-base-cost="60">
+                                            <div class="model-item-icon"><i class="fa-solid fa-film"></i></div>
+                                            <div class="model-item-info"><span class="model-item-name">Sora 2</span><span class="model-item-provider">OpenAI</span></div>
+                                            <span class="model-badge badge-new">New</span>
+                                        </div>
+                                        <div class="model-item" data-type="video" data-name="Veo 3" data-provider="Google DeepMind" data-base-cost="70">
+                                            <div class="model-item-icon"><i class="fa-solid fa-film"></i></div>
+                                            <div class="model-item-info"><span class="model-item-name">Veo 3</span><span class="model-item-provider">Google DeepMind</span></div>
+                                            <span class="model-badge badge-new">New</span>
+                                        </div>
+                                        <div class="model-item" data-type="video" data-name="Gemini Omni" data-provider="Google" data-base-cost="80">
+                                            <div class="model-item-icon"><i class="fa-solid fa-film"></i></div>
+                                            <div class="model-item-info"><span class="model-item-name">Gemini Omni</span><span class="model-item-provider">Google</span></div>
+                                            <span class="model-badge badge-pro">Pro</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="dropdown-section">
+                                    <div class="dropdown-label">Image Models</div>
+                                    <div class="model-list" id="imageModelsList">
+                                        <div class="model-item" data-type="image" data-name="Nano Banana Pro" data-provider="Google" data-base-cost="40">
+                                            <div class="model-item-icon"><i class="fa-solid fa-image"></i></div>
+                                            <div class="model-item-info"><span class="model-item-name">Nano Banana Pro</span><span class="model-item-provider">Google</span></div>
+                                            <span class="model-badge badge-pro">Pro</span>
+                                        </div>
+                                        <div class="model-item" data-type="image" data-name="Midjourney v7" data-provider="Midjourney" data-base-cost="35">
+                                            <div class="model-item-icon"><i class="fa-solid fa-image"></i></div>
+                                            <div class="model-item-info"><span class="model-item-name">Midjourney v7</span><span class="model-item-provider">Midjourney</span></div>
+                                            <span class="model-badge badge-new">New</span>
+                                        </div>
+                                        <div class="model-item" data-type="image" data-name="Flux 2 Pro" data-provider="Black Forest Labs" data-base-cost="45">
+                                            <div class="model-item-icon"><i class="fa-solid fa-image"></i></div>
+                                            <div class="model-item-info"><span class="model-item-name">Flux 2 Pro</span><span class="model-item-provider">Black Forest Labs</span></div>
+                                            <span class="model-badge badge-pro">Pro</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mode Selection (Video Only) -->
+                    <div class="input-group" id="modeGroup">
+                        <label>Generation Mode</label>
+                        <div class="pills" id="modePills">
+                            <button class="pill active" data-mode="t2v">Text to Video</button>
+                            <button class="pill" data-mode="i2v">Image to Video</button>
+                        </div>
+                    </div>
+
+                    <!-- Image Upload (Hidden by default) -->
+                    <div class="input-group" id="uploadGroup" style="display: none;">
+                        <label>Upload Image</label>
+                        <label for="imgUpload" class="upload-box" id="uploadLabel">
+                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                            <span id="uploadText">Click to upload image</span>
+                        </label>
+                        <input type="file" id="imgUpload" accept="image/*" style="display: none;">
+                    </div>
+
+                    <!-- Prompt -->
+                    <div class="input-group">
+                        <label>Prompt</label>
+                        <textarea id="promptInput" class="dash-input" rows="4" placeholder="A lone astronaut walking on a salt flat at golden hour..."></textarea>
+                    </div>
+
+                    <!-- Aspect Ratio -->
+                    <div class="input-group">
+                        <label>Aspect Ratio</label>
+                        <div class="pills" id="aspectGroup">
+                            <button class="pill active">1:1</button>
+                            <button class="pill">16:9</button>
+                            <button class="pill">9:16</button>
+                            <button class="pill">4:3</button>
+                        </div>
+                    </div>
+
+                    <!-- Resolution -->
+                    <div class="input-group">
+                        <label>Resolution</label>
+                        <div class="pills" id="resGroup">
+                            <button class="pill" data-cost-mod="0">720p</button>
+                            <button class="pill active" data-cost-mod="10">1080p</button>
+                            <button class="pill" data-cost-mod="20">2K</button>
+                            <button class="pill" data-cost-mod="40">4K</button>
+                        </div>
+                    </div>
+
+                    <!-- Duration (Video Only) -->
+                    <div class="input-group" id="durationGroup">
+                        <label>Duration</label>
+                        <div class="pills" id="durationPills">
+                            <button class="pill active" data-cost-mod="0">10s</button>
+                            <button class="pill" data-cost-mod="30">15s</button>
+                        </div>
+                    </div>
+
+                    <!-- Generate Button -->
+                    <button id="generateBtn" class="btn-generate">
+                        <i class="fa-solid fa-bolt"></i> Generate (Cost: <span id="dynamicCost">0</span> Credits)
+                    </button>
+                </div>
+
+                <!-- Right Preview -->
+                <div class="preview-panel">
+                    <div class="preview-header">
+                        <span class="status-text">Idle · Ready to generate</span>
+                        <div class="preview-actions">
+                            <button class="icon-btn"><i class="fa-solid fa-download"></i></button>
+                            <button class="icon-btn"><i class="fa-solid fa-share"></i></button>
+                        </div>
+                    </div>
+                    <div class="preview-screen" id="previewScreen">
+                        <div class="empty-state" id="emptyState">
+                            <i class="fa-solid fa-image"></i>
+                            <h4>Your canvas awaits</h4>
+                            <p>Configure settings and hit Generate</p>
+                        </div>
+                        <img id="previewImg" src="" alt="Preview" style="display: none;">
+                        <div class="loading-overlay" id="loadingOverlay">
+                            <div class="loader"></div>
+                            <p>Diffusing pixels...</p>
+                        </div>
+                    </div>
+                    <div class="prompt-log" id="promptLog"></div>
+                </div>
+            </div>
+        </main>
     </div>
 
     <script src="admin.js"></script>
