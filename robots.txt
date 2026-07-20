@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /gallery
+Disallow: /settings
+Disallow: /tasks
+Disallow: /auth
+
+Sitemap: https://nexusgen.cc/sitemap.xml
