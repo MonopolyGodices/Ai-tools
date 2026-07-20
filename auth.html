@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Sign In — NEXUS GEN AI Generation Atlas</title>
-    <meta name="description" content="Access the NEXUS AI console. Sign in to generate videos and images with Sora 2, Seedance 2, Midjourney v7 and 50+ models.">
+    <meta name="description" content="Access the NEXUS GEN console. Sign in to generate videos and images with Sora 2, Seedance 2, Midjourney v7 and 50+ models.">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -194,7 +194,7 @@
 
     <!-- Left Visual Side -->
     <aside class="auth-visual">
-        <a href="index.html" class="logo-back">
+        <a href="index" class="logo-back">
             <div class="logo-mark">N</div>
             <span>NEXUS GEN</span>
         </a>
@@ -214,7 +214,7 @@
     <main class="auth-form-side">
         <div class="form-container">
             
-            <a href="index.html" class="logo-back mobile-logo">
+            <a href="index" class="logo-back mobile-logo">
                 <div class="logo-mark">N</div>
                 <span>NEXUS GEN</span>
             </a>
@@ -236,7 +236,7 @@
                     <label class="input-label">Email Address</label>
                     <div class="input-wrapper">
                         <i class="fa-solid fa-envelope"></i>
-                        <input type="email" id="signinEmail" class="auth-input" placeholder="you@nexus.ai" required>
+                        <input type="email" id="signinEmail" class="auth-input" placeholder="you@nexusgen.cc" required>
                     </div>
                 </div>
                 <div class="input-group">
@@ -271,7 +271,7 @@
                     <label class="input-label">Email Address</label>
                     <div class="input-wrapper">
                         <i class="fa-solid fa-envelope"></i>
-                        <input type="email" id="signupEmail" class="auth-input" placeholder="you@nexus.ai" required>
+                        <input type="email" id="signupEmail" class="auth-input" placeholder="you@nexusgen.cc" required>
                     </div>
                 </div>
                 <div class="input-group">
@@ -366,7 +366,7 @@
             localStorage.setItem('nexusUser', JSON.stringify(userData));
             
             // Redirect to Dashboard
-            window.location.href = 'dashboard.html';
+            window.location.href = 'dashboard';
         }
 
         // Sign In Logic (Local Storage)
@@ -382,7 +382,7 @@
                 const user = JSON.parse(savedUser);
                 // Check if credentials match
                 if (user.email === email && user.password === password) {
-                    window.location.href = 'dashboard.html';
+                    window.location.href = 'dashboard';
                 } else {
                     showToast('Incorrect email or password. Please try again.');
                 }
