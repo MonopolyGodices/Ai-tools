@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Redirect + button to tasks page
     document.getElementById('addCreditsBtn').addEventListener('click', () => {
-        window.location.href = 'tasks.html';
+        window.location.href = 'tasks';
     });
 
     updateCost(); // Initialize cost on load
@@ -231,7 +231,7 @@ function handleGenerate() {
 }
 
 function goToTasks() {
-    window.location.href = 'tasks.html';
+    window.location.href = 'tasks';
 }
 
 function finishGeneration() {
