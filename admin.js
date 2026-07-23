@@ -1,5 +1,5 @@
 // 1. Admin Security Gate
-const ADMIN_EMAIL = "Hwlwmhmd724@gmail.com"; // الإيميل ديالك
+const ADMIN_EMAIL = "hwlwmhmd724@gmail.com"; // الإيميل ديالك
 
 firebase.auth().onAuthStateChanged((user) => {
     const gate = document.getElementById('adminGate');
@@ -7,7 +7,7 @@ firebase.auth().onAuthStateChanged((user) => {
     const panel = document.getElementById('adminPanel');
 
     if (user) {
-        if (user.email === ADMIN_EMAIL) {
+        if (user.email.toLowerCase() === ADMIN_EMAIL) {
             // Access Granted
             gate.style.display = 'none';
             panel.style.display = 'block';
