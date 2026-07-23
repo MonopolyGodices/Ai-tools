@@ -5,20 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="robots" content="noindex, nofollow">
     <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-3JZDK2EW7N"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-3JZDK2EW7N');
-</script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-3JZDK2EW7N"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-3JZDK2EW7N');
+    </script>
     <title>Console — NEXUS GEN</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="dashboard.css">
+    
+    <!-- Firebase Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
@@ -97,7 +101,7 @@
                             <div class="select-dropdown" id="selectDropdown">
                                 <div class="dropdown-search">
                                     <i class="fa-solid fa-magnifying-glass"></i>
-                                    <input type="text" id="modelSearch" placeholder="Search 52 models..." class="search-input">
+                                    <input type="text" id="modelSearch" placeholder="Search 60+ models..." class="search-input">
                                 </div>
                                 
                                 <div class="dropdown-section">
@@ -395,6 +399,8 @@
         </main>
     </div>
 
+    <!-- Scripts -->
+    <script src="firebase-config.js"></script>
     <script src="dashboard.js"></script>
 </body>
 </html>
