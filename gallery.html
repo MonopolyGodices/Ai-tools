@@ -63,6 +63,10 @@
         .empty-gallery h3 { font-family: 'Instrument Serif', serif; font-style: italic; font-size: 28px; color: var(--text-dim); margin-bottom: 8px; }
         .empty-gallery p { font-size: 14px; margin-bottom: 24px; }
     </style>
+        <!-- Firebase Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
@@ -124,7 +128,7 @@
         <i class="fa-solid fa-circle-info"></i>
         <span id="toastMsg">Message</span>
     </div>
-
+    <script src="firebase-config.js"></script>
     <script src="gallery.js"></script>
 </body>
 </html>
