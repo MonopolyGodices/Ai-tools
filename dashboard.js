@@ -1,27 +1,49 @@
-// Protect Route & Load User Data
+// Protect Route & Load User Data via Firebase
 document.addEventListener('DOMContentLoaded', () => {
-    const savedUser = localStorage.getItem('nexusUser');
-    if (!savedUser) { window.location.href = 'auth.html'; return; }
-    const user = JSON.parse(savedUser);
-    document.getElementById('userName').innerText = user.name;
-    document.getElementById('userCredits').innerText = user.credits;
-    document.querySelector('.avatar').innerText = user.name.charAt(0).toUpperCase();
+    firebase.auth().onAuthStateChanged((user) => {
+        if (!user) {
+            window.location.href = 'auth';
+            return;
+        }
 
-    document.getElementById('logoutBtn').addEventListener('click', () => {
-        localStorage.removeItem('nexusUser');
-        window.location.href = 'index.html';
+        // Fetch user data from Firestore in real-time
+        db.collection('users').doc(user.uid).onSnapshot((doc) => {
+            if (doc.exists) {
+                const userData = doc.data();
+                document.getElementById('userName').innerText = userData.name;
+                document.getElementById('userCredits').innerText = userData.credits;
+                document.querySelector('.avatar').innerText = userData.name.charAt(0).toUpperCase();
+                
+                // Keep localStorage in sync
+                localStorage.setItem('nexusUser', JSON.stringify(userData));
+            } else {
+                // Create user document if it doesn't exist
+                db.collection('users').doc(user.uid).set({
+                    name: user.displayName || 'User',
+                    email: user.email,
+                    credits: 50,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            }
+        });
+
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            firebase.auth().signOut().then(() => {
+                localStorage.removeItem('nexusUser');
+                window.location.href = 'auth';
+            });
+        });
+
+        document.getElementById('menuToggle').addEventListener('click', () => {
+            document.getElementById('sidebar').classList.toggle('active');
+        });
+
+        document.getElementById('addCreditsBtn').addEventListener('click', () => {
+            window.location.href = 'tasks';
+        });
+
+        updateCost(); // Initialize cost on load
     });
-
-    document.getElementById('menuToggle').addEventListener('click', () => {
-        document.getElementById('sidebar').classList.toggle('active');
-    });
-
-    // Redirect + button to tasks page
-    document.getElementById('addCreditsBtn').addEventListener('click', () => {
-        window.location.href = 'tasks';
-    });
-
-    updateCost(); // Initialize cost on load
 });
 
 // Toast Logic
@@ -165,7 +187,7 @@ function updateCost() {
     document.getElementById('dynamicCost').innerText = cost;
 }
 
-// Generate Logic
+// Generate Logic with Firebase Firestore
 const generateBtn = document.getElementById('generateBtn');
 const loadingOverlay = document.getElementById('loadingOverlay');
 const previewImg = document.getElementById('previewImg');
@@ -176,58 +198,70 @@ const emptyState = document.getElementById('emptyState');
 generateBtn.addEventListener('click', handleGenerate);
 
 function handleGenerate() {
-    const savedUser = localStorage.getItem('nexusUser');
-    if (!savedUser) return;
+    const user = firebase.auth().currentUser;
+    if (!user) return;
 
-    const user = JSON.parse(savedUser);
     const cost = calculateCost();
+    const userRef = db.collection('users').doc(user.uid);
 
-    if (user.credits < cost) {
-        const needed = cost - user.credits;
-        addLog(`Error: Insufficient credits. Need ${needed} more.`, 'error');
-        statusText.innerText = 'Error · Insufficient credits';
-        statusText.style.color = 'var(--accent-3)';
+    // Start Transaction to deduct credits securely
+    db.runTransaction((transaction) => {
+        return transaction.get(userRef).then((doc) => {
+            if (!doc.exists) {
+                throw "Document does not exist!";
+            }
+            const currentCredits = doc.data().credits || 0;
+            if (currentCredits < cost) {
+                throw "Insufficient credits";
+            }
+            const newCredits = currentCredits - cost;
+            transaction.update(userRef, { credits: newCredits });
+            return newCredits;
+        });
+    }).then((newCredits) => {
+        // Credits deducted successfully, start generation
+        document.getElementById('userCredits').innerText = newCredits;
         
-        // Change Generate Button to "Get Free Credits"
-        generateBtn.innerHTML = '<i class="fa-solid fa-gift"></i> Get 100 Free Credits';
-        generateBtn.style.background = 'var(--accent-3)';
-        generateBtn.style.color = '#fff';
-        generateBtn.style.border = 'none';
+        generateBtn.disabled = true;
+        generateBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generating...';
+        emptyState.style.display = 'none';
+        previewImg.style.display = 'block';
+        loadingOverlay.classList.add('active');
+        statusText.innerText = 'Processing...';
+        statusText.style.color = 'var(--accent-2)';
         
-        // Remove original click event and add redirect event
-        generateBtn.removeEventListener('click', handleGenerate);
-        generateBtn.addEventListener('click', goToTasks);
+        const activeModel = document.querySelector('.model-item.active');
+        addLog(`> Task started: ${activeModel.dataset.name} (Cost: ${cost}cr)`, 'info');
         
-        showToast(`Insufficient credits. You need ${needed} more. Earn free credits now!`);
-        return;
-    }
-
-    // Deduct credits
-    user.credits -= cost;
-    localStorage.setItem('nexusUser', JSON.stringify(user));
-    document.getElementById('userCredits').innerText = user.credits;
-
-    // Start Generation
-    generateBtn.disabled = true;
-    generateBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generating...';
-    emptyState.style.display = 'none';
-    previewImg.style.display = 'block';
-    loadingOverlay.classList.add('active');
-    statusText.innerText = 'Processing...';
-    statusText.style.color = 'var(--accent-2)';
-    
-    const activeModel = document.querySelector('.model-item.active');
-    addLog(`> Task started: ${activeModel.dataset.name} (Cost: ${cost}cr)`, 'info');
-    
-    let progress = 0;
-    const interval = setInterval(() => {
-        progress += 10;
-        addLog(`> Diffusing step ${progress}/100...`);
-        if (progress >= 100) {
-            clearInterval(interval);
-            finishGeneration();
+        let progress = 0;
+        const interval = setInterval(() => {
+            progress += 10;
+            addLog(`> Diffusing step ${progress}/100...`);
+            if (progress >= 100) {
+                clearInterval(interval);
+                finishGeneration();
+            }
+        }, 400);
+    }).catch((error) => {
+        if (error === "Insufficient credits") {
+            const needed = cost - (JSON.parse(localStorage.getItem('nexusUser')).credits || 0);
+            addLog(`Error: Insufficient credits. Need ${needed} more.`, 'error');
+            statusText.innerText = 'Error · Insufficient credits';
+            statusText.style.color = 'var(--accent-3)';
+            
+            generateBtn.innerHTML = '<i class="fa-solid fa-gift"></i> Get 100 Free Credits';
+            generateBtn.style.background = 'var(--accent-3)';
+            generateBtn.style.color = '#fff';
+            generateBtn.style.border = 'none';
+            
+            generateBtn.removeEventListener('click', handleGenerate);
+            generateBtn.addEventListener('click', goToTasks);
+            
+            showToast(`Insufficient credits. You need ${needed} more. Earn free credits now!`);
+        } else {
+            showToast('An error occurred. Please try again.');
         }
-    }, 400);
+    });
 }
 
 function goToTasks() {
