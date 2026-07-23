@@ -7,7 +7,6 @@ firebase.auth().onAuthStateChanged((user) => {
     const panel = document.getElementById('adminPanel');
 
     if (user) {
-        // User is logged in, check if they are admin
         if (user.email === ADMIN_EMAIL) {
             // Access Granted
             gate.style.display = 'none';
@@ -23,16 +22,19 @@ firebase.auth().onAuthStateChanged((user) => {
             panel.style.display = 'none';
         }
     } else {
-        // Not logged in
-        gateBox.innerHTML = `
-            <h2>Authentication Required</h2>
-            <p>Please sign in to access the admin console.</p>
-            <a href="auth" class="btn-submit" style="display: inline-block; margin-top: 20px; text-decoration: none; background: var(--accent); color: #fff; padding: 12px 24px; border-radius: 8px;">Sign In</a>
-        `;
-        gate.style.display = 'flex';
-        panel.style.display = 'none';
+        // Not logged in - Redirect to auth
+        window.location.href = 'auth';
     }
 });
+
+// Fallback: إذا بان loading مدة 4 ثواني ومابانش نتيجة، حولو لتسجيل الدخول
+setTimeout(() => {
+    if (document.getElementById('adminPanel').style.display !== 'block') {
+        if (!firebase.auth().currentUser) {
+            window.location.href = 'auth';
+        }
+    }
+}, 4000);
 
 // 2. Add Credits to Admin Account (Firestore)
 function addAdminCredits(amount) {
@@ -51,19 +53,18 @@ function addAdminCredits(amount) {
             return newCredits;
         });
     }).then((newCredits) => {
-        // Update LocalStorage for dashboard compatibility
         const savedUser = JSON.parse(localStorage.getItem('nexusUser') || '{}');
         savedUser.credits = newCredits;
         localStorage.setItem('nexusUser', JSON.stringify(savedUser));
         
-        alert(`Success: ${amount} credits added to your account! Total: ${newCredits}`);
+        alert(`Success: ${amount} credits added! Total: ${newCredits}`);
     }).catch((error) => {
         console.error("Error adding credits: ", error);
         alert("Error adding credits. Please try again.");
     });
 }
 
-// 3. Free Generation (Bypass Credits)
+// 3. Free Generation
 function generateAdmin() {
     const btn = event.currentTarget;
     const status = document.getElementById('adminStatus');
@@ -94,7 +95,7 @@ function generateAdmin() {
     }, 3000);
 }
 
-// 4. Pills Selection (Aspect Ratio)
+// 4. Pills Selection
 document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.pills').forEach(group => {
         group.addEventListener('click', (e) => {
