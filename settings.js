@@ -1,59 +1,91 @@
 // Protect Route & Load User Data
 document.addEventListener('DOMContentLoaded', () => {
-    const savedUser = localStorage.getItem('nexusUser');
-    if (!savedUser) { window.location.href = 'auth.html'; return; }
-    
-    const user = JSON.parse(savedUser);
-    
-    // Populate UI
-    document.getElementById('userName').innerText = user.name;
-    document.getElementById('userCredits').innerText = user.credits;
-    document.querySelector('.avatar').innerText = user.name.charAt(0).toUpperCase();
-
-    // Populate Settings Form
-    document.getElementById('settingsName').value = user.name;
-    document.getElementById('settingsEmail').value = user.email;
-
-    // Populate Stats
-    document.getElementById('statCredits').innerText = user.credits;
-    const history = JSON.parse(localStorage.getItem('nexusHistory') || '[]');
-    document.getElementById('statGens').innerText = history.length;
-    document.getElementById('statMember').innerText = user.credits > 50 ? 'Pro' : 'Starter';
-
-    // Event Listeners
-    document.getElementById('logoutBtn').addEventListener('click', () => {
-        localStorage.removeItem('nexusUser');
-        window.location.href = 'index.html';
-    });
-
-    document.getElementById('menuToggle').addEventListener('click', () => {
-        document.getElementById('sidebar').classList.toggle('active');
-    });
-
-    // Redirect + button to tasks page
-    document.getElementById('addCreditsBtn').addEventListener('click', () => {
-        window.location.href = 'tasks.html';
-    });
-
-    // Save Profile Changes
-    document.getElementById('profileForm').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const newName = document.getElementById('settingsName').value;
-        const newEmail = document.getElementById('settingsEmail').value;
-        const newPassword = document.getElementById('settingsPassword').value;
-
-        user.name = newName;
-        user.email = newEmail;
-        if (newPassword.trim() !== '') {
-            user.password = newPassword; // Update password if provided
+    firebase.auth().onAuthStateChanged((user) => {
+        if (!user) {
+            window.location.href = 'auth';
+            return;
         }
 
-        localStorage.setItem('nexusUser', JSON.stringify(user));
-        document.getElementById('userName').innerText = user.name;
-        document.querySelector('.avatar').innerText = user.name.charAt(0).toUpperCase();
-        
-        showToast('Profile updated successfully!');
-        document.getElementById('settingsPassword').value = ''; // Clear password field
+        db.collection('users').doc(user.uid).get().then((doc) => {
+            if (doc.exists) {
+                const userData = doc.data();
+                // Populate UI
+                document.getElementById('userName').innerText = userData.name;
+                document.getElementById('userCredits').innerText = userData.credits;
+                document.querySelector('.avatar').innerText = userData.name.charAt(0).toUpperCase();
+
+                // Populate Settings Form
+                document.getElementById('settingsName').value = userData.name;
+                document.getElementById('settingsEmail').value = userData.email;
+
+                // Populate Stats
+                document.getElementById('statCredits').innerText = userData.credits;
+                const history = JSON.parse(localStorage.getItem('nexusHistory') || '[]');
+                document.getElementById('statGens').innerText = history.length;
+                document.getElementById('statMember').innerText = userData.credits > 50 ? 'Pro' : 'Starter';
+            }
+        });
+
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            firebase.auth().signOut().then(() => {
+                localStorage.removeItem('nexusUser');
+                window.location.href = 'auth';
+            });
+        });
+
+        document.getElementById('menuToggle').addEventListener('click', () => {
+            document.getElementById('sidebar').classList.toggle('active');
+        });
+
+        document.getElementById('addCreditsBtn').addEventListener('click', () => {
+            window.location.href = 'tasks';
+        });
+
+        // Save Profile Changes
+        document.getElementById('profileForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const newName = document.getElementById('settingsName').value;
+            const newEmail = document.getElementById('settingsEmail').value;
+            const newPassword = document.getElementById('settingsPassword').value;
+
+            const btn = document.querySelector('.btn-save');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+            btn.disabled = true;
+
+            const promises = [];
+
+            if (newEmail !== user.email) {
+                promises.push(user.updateEmail(newEmail));
+            }
+
+            if (newPassword.trim() !== '') {
+                promises.push(user.updatePassword(newPassword));
+            }
+
+            promises.push(db.collection('users').doc(user.uid).update({
+                name: newName,
+                email: newEmail
+            }));
+
+            Promise.all(promises).then(() => {
+                const savedUser = JSON.parse(localStorage.getItem('nexusUser') || '{}');
+                savedUser.name = newName;
+                savedUser.email = newEmail;
+                localStorage.setItem('nexusUser', JSON.stringify(savedUser));
+
+                document.getElementById('userName').innerText = newName;
+                document.querySelector('.avatar').innerText = newName.charAt(0).toUpperCase();
+                
+                showToast('Profile updated successfully!');
+                document.getElementById('settingsPassword').value = '';
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> Save Changes';
+                btn.disabled = false;
+            }).catch((error) => {
+                showToast(error.message);
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> Save Changes';
+                btn.disabled = false;
+            });
+        });
     });
 });
 
@@ -78,8 +110,17 @@ function clearGallery() {
 // Delete Account
 function deleteAccount() {
     if (confirm('Are you absolutely sure? This will permanently delete your account and all data.')) {
-        localStorage.removeItem('nexusUser');
-        localStorage.removeItem('nexusHistory');
-        window.location.href = 'index.html'; // Redirect to landing page
+        const user = firebase.auth().currentUser;
+        if (user) {
+            db.collection('users').doc(user.uid).delete().then(() => {
+                return user.delete();
+            }).then(() => {
+                localStorage.removeItem('nexusUser');
+                localStorage.removeItem('nexusHistory');
+                window.location.href = 'index';
+            }).catch((error) => {
+                showToast('Error deleting account. Please sign in again to confirm.');
+            });
+        }
     }
 }
