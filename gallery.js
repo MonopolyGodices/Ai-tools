@@ -1,28 +1,47 @@
 // Protect Route & Load User Data
 document.addEventListener('DOMContentLoaded', () => {
-    const savedUser = localStorage.getItem('nexusUser');
-    if (!savedUser) { window.location.href = 'auth.html'; return; }
-    
-    const user = JSON.parse(savedUser);
-    document.getElementById('userName').innerText = user.name;
-    document.getElementById('userCredits').innerText = user.credits;
-    document.querySelector('.avatar').innerText = user.name.charAt(0).toUpperCase();
+    firebase.auth().onAuthStateChanged((user) => {
+        if (!user) {
+            window.location.href = 'auth';
+            return;
+        }
+        
+        // Load user data from localStorage (synced from dashboard)
+        const savedUser = JSON.parse(localStorage.getItem('nexusUser') || '{}');
+        if (savedUser.name) {
+            document.getElementById('userName').innerText = savedUser.name;
+            document.getElementById('userCredits').innerText = savedUser.credits;
+            document.querySelector('.avatar').innerText = savedUser.name.charAt(0).toUpperCase();
+        } else {
+            // Fallback to Firebase if localStorage is empty
+            db.collection('users').doc(user.uid).get().then((doc) => {
+                if (doc.exists) {
+                    const userData = doc.data();
+                    document.getElementById('userName').innerText = userData.name;
+                    document.getElementById('userCredits').innerText = userData.credits;
+                    document.querySelector('.avatar').innerText = userData.name.charAt(0).toUpperCase();
+                    localStorage.setItem('nexusUser', JSON.stringify(userData));
+                }
+            });
+        }
 
-    document.getElementById('logoutBtn').addEventListener('click', () => {
-        localStorage.removeItem('nexusUser');
-        window.location.href = 'index.html';
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            firebase.auth().signOut().then(() => {
+                localStorage.removeItem('nexusUser');
+                window.location.href = 'auth';
+            });
+        });
+
+        document.getElementById('menuToggle').addEventListener('click', () => {
+            document.getElementById('sidebar').classList.toggle('active');
+        });
+
+        document.getElementById('addCreditsBtn').addEventListener('click', () => {
+            window.location.href = 'tasks';
+        });
+
+        renderGallery();
     });
-
-    document.getElementById('menuToggle').addEventListener('click', () => {
-        document.getElementById('sidebar').classList.toggle('active');
-    });
-
-    // Redirect + button to tasks page
-    document.getElementById('addCreditsBtn').addEventListener('click', () => {
-        window.location.href = 'tasks.html';
-    });
-
-    renderGallery();
 });
 
 // Toast Logic
@@ -45,7 +64,7 @@ function renderGallery() {
                 <i class="fa-solid fa-image"></i>
                 <h3>Your canvas is empty</h3>
                 <p>You haven't generated anything yet. Let's create something extraordinary.</p>
-                <button onclick="window.location.href='dashboard.html'" class="btn-generate" style="width: auto; padding: 12px 24px;">
+                <button onclick="window.location.href='dashboard'" class="btn-generate" style="width: auto; padding: 12px 24px;">
                     <i class="fa-solid fa-wand-magic-sparkles"></i> Start Generating
                 </button>
             </div>
