@@ -57,6 +57,10 @@
         .btn-task.disabled { background: var(--surface-2); color: var(--text-faint); cursor: not-allowed; pointer-events: none; }
         .btn-task.loading { background: var(--surface-2); color: var(--text-dim); pointer-events: none; }
     </style>
+        <!-- Firebase Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
@@ -155,7 +159,7 @@
         <i class="fa-solid fa-circle-info"></i>
         <span id="toastMsg">Message</span>
     </div>
-
+    <script src="firebase-config.js"></script>
     <script src="tasks.js"></script>
 </body>
 </html>
