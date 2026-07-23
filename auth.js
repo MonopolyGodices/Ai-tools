@@ -47,7 +47,6 @@ function handleSignUp(event) {
     firebase.auth().createUserWithEmailAndPassword(email, password)
         .then((userCredential) => {
             const user = userCredential.user;
-            // Create Firestore user document
             return db.collection('users').doc(user.uid).set({
                 name: name,
                 email: email,
@@ -56,7 +55,6 @@ function handleSignUp(event) {
             });
         })
         .then(() => {
-            // Bridge: also set localStorage for gallery.js/settings.js compatibility
             localStorage.setItem('nexusUser', JSON.stringify({ name: name, email: email, credits: 50 }));
             window.location.href = 'dashboard';
         })
@@ -80,13 +78,11 @@ function handleSignIn(event) {
     firebase.auth().signInWithEmailAndPassword(email, password)
         .then((userCredential) => {
             const user = userCredential.user;
-            // Get user data from Firestore
             return db.collection('users').doc(user.uid).get();
         })
         .then((doc) => {
             if (doc.exists) {
                 const userData = doc.data();
-                // Bridge: also set localStorage
                 localStorage.setItem('nexusUser', JSON.stringify({ 
                     name: userData.name, 
                     email: userData.email, 
@@ -102,65 +98,65 @@ function handleSignIn(event) {
         });
 }
 
-// Google Sign-In
+// Google Sign-In (تم إصلاحه ليعمل بالتحويل Redirect باش يخدم فالهاتف)
 function signInWithGoogle() {
     const provider = new firebase.auth.GoogleAuthProvider();
-    firebase.auth().signInWithPopup(provider)
-        .then((result) => {
-            const user = result.user;
-            const userRef = db.collection('users').doc(user.uid);
-            
-            return userRef.get().then((doc) => {
-                if (!doc.exists) {
-                    // New user - create document
-                    return userRef.set({
-                        name: user.displayName || 'User',
-                        email: user.email,
-                        credits: 50,
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                    }).then(() => {
-                        localStorage.setItem('nexusUser', JSON.stringify({ 
-                            name: user.displayName || 'User', 
-                            email: user.email, 
-                            credits: 50 
-                        }));
-                    });
-                } else {
-                    // Existing user - update localStorage
-                    const userData = doc.data();
-                    localStorage.setItem('nexusUser', JSON.stringify({ 
-                        name: userData.name, 
-                        email: userData.email, 
-                        credits: userData.credits 
-                    }));
-                }
-            });
-        })
-        .then(() => {
-            window.location.href = 'dashboard';
-        })
-        .catch((error) => {
-            showToast(error.message);
-        });
+    firebase.auth().signInWithRedirect(provider);
 }
 
-// Auto-redirect if already logged in
+// معالجة التحول منين يرجع من جوجل
+firebase.auth().getRedirectResult().then((result) => {
+    if (result.user) {
+        const user = result.user;
+        const userRef = db.collection('users').doc(user.uid);
+        
+        return userRef.get().then((doc) => {
+            if (!doc.exists) {
+                return userRef.set({
+                    name: user.displayName || 'User',
+                    email: user.email,
+                    credits: 50,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                }).then(() => {
+                    localStorage.setItem('nexusUser', JSON.stringify({ 
+                        name: user.displayName || 'User', 
+                        email: user.email, 
+                        credits: 50 
+                    }));
+                });
+            } else {
+                const userData = doc.data();
+                localStorage.setItem('nexusUser', JSON.stringify({ 
+                    name: userData.name, 
+                    email: userData.email, 
+                    credits: userData.credits 
+                }));
+            }
+        }).then(() => {
+            window.location.href = 'dashboard';
+        });
+    }
+}).catch((error) => {
+    showToast(error.message);
+});
+
+// إصلاح مشكل الصفحة الرئيسية: يلا المستخدم مسجل، توجهو ديريكت للوحة التحكم
 firebase.auth().onAuthStateChanged((user) => {
     if (user) {
-        // Check if we have localStorage data, if not fetch it
-        if (!localStorage.getItem('nexusUser')) {
-            db.collection('users').doc(user.uid).get().then((doc) => {
-                if (doc.exists) {
-                    const userData = doc.data();
-                    localStorage.setItem('nexusUser', JSON.stringify({ 
-                        name: userData.name, 
-                        email: userData.email, 
-                        credits: userData.credits 
-                    }));
-                }
-                window.location.href = 'dashboard';
-            });
-        }
+        // يلا كان مسجل، سيفطو للوحة التحكم بلا ما يبقا فصفحة التسجيل
+        db.collection('users').doc(user.uid).get().then((doc) => {
+            if (doc.exists) {
+                const userData = doc.data();
+                localStorage.setItem('nexusUser', JSON.stringify({ 
+                    name: userData.name, 
+                    email: userData.email, 
+                    credits: userData.credits 
+                }));
+            }
+            window.location.href = 'dashboard';
+        }).catch(() => {
+            window.location.href = 'dashboard';
+        });
     }
 });
 
