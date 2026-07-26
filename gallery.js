@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
             window.location.href = 'tasks';
         });
 
-        renderGallery();
+        renderGallery(user.uid);
     });
 });
 
@@ -45,22 +45,22 @@ function showToast(message) {
     setTimeout(() => { toast.classList.remove('show'); }, 3000);
 }
 
-// Render Gallery Items (Firebase + LocalStorage)
-function renderGallery() {
+// Render Gallery Items (Firebase Promo + LocalStorage)
+function renderGallery(userId) {
     const galleryGrid = document.getElementById('galleryGrid');
 
     // 1. جلب التصاور اللي صاوب المستخدم (LocalStorage)
     const localHistory = JSON.parse(localStorage.getItem('nexusHistory') || '[]');
 
-    // 2. جلب التصاور الرسمية من Firebase
-    db.collection('gallery').get().then((querySnapshot) => {
-        let firebaseGallery = [];
-        querySnapshot.forEach((doc) => {
-            firebaseGallery.push(doc.data());
-        });
+    // 2. جلب التصاور الرسمية من حساب المستخدم فـ Firebase
+    db.collection('users').doc(userId).get().then((doc) => {
+        let promoGallery = [];
+        if (doc.exists && doc.data().promoGallery) {
+            promoGallery = doc.data().promoGallery;
+        }
 
-        // 3. دمج التصاور (الفايربيس فوق باش يبانو أول حاجة)
-        let allItems = [...firebaseGallery, ...localHistory];
+        // 3. دمج التصاور (الفايبيس فوق باش يبانو أول حاجة)
+        let allItems = [...promoGallery, ...localHistory];
 
         if (allItems.length === 0) {
             galleryGrid.innerHTML = `
@@ -76,7 +76,7 @@ function renderGallery() {
             return;
         }
 
-        galleryGrid.innerHTML = allItems.map(item => `
+        galleryGrid.innerHTML = allItems.map((item, index) => `
             <div class="gallery-card">
                 <div class="gallery-img-wrapper">
                     ${item.type === 'video' ? 
@@ -89,7 +89,7 @@ function renderGallery() {
                     </div>
                     <div class="gallery-actions">
                         <button class="action-btn" title="Open" onclick="window.open('${item.url}', '_blank')"><i class="fa-solid fa-up-right-from-square"></i></button>
-                        <button class="action-btn delete" title="Delete" onclick="deleteItem('${item.id || ''}')"><i class="fa-solid fa-trash"></i></button>
+                        <button class="action-btn delete" title="Delete" onclick="deleteItem(${item.id || index})"><i class="fa-solid fa-trash"></i></button>
                     </div>
                 </div>
                 <div class="gallery-info">
@@ -105,13 +105,15 @@ function renderGallery() {
 
 // Delete Item (Local Only for user generated)
 function deleteItem(id) {
-    if (!id) {
-        showToast('Official showcase items cannot be deleted.');
+    let history = JSON.parse(localStorage.getItem('nexusHistory') || '[]');
+    let newHistory = history.filter(item => item.id != id);
+    
+    if (newHistory.length === history.length) {
+        showToast('Promo items can only be removed from Firebase.');
         return;
     }
-    let history = JSON.parse(localStorage.getItem('nexusHistory') || '[]');
-    history = history.filter(item => item.id != id);
-    localStorage.setItem('nexusHistory', JSON.stringify(history));
-    renderGallery();
+    
+    localStorage.setItem('nexusHistory', JSON.stringify(newHistory));
+    renderGallery(firebase.auth().currentUser.uid);
     showToast('Item deleted successfully.');
 }
