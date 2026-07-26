@@ -5,25 +5,17 @@ document.addEventListener('DOMContentLoaded', () => {
             window.location.href = 'auth';
             return;
         }
-        
-        // Load user data from localStorage (synced from dashboard)
-        const savedUser = JSON.parse(localStorage.getItem('nexusUser') || '{}');
-        if (savedUser.name) {
-            document.getElementById('userName').innerText = savedUser.name;
-            document.getElementById('userCredits').innerText = savedUser.credits;
-            document.querySelector('.avatar').innerText = savedUser.name.charAt(0).toUpperCase();
-        } else {
-            // Fallback to Firebase if localStorage is empty
-            db.collection('users').doc(user.uid).get().then((doc) => {
-                if (doc.exists) {
-                    const userData = doc.data();
-                    document.getElementById('userName').innerText = userData.name;
-                    document.getElementById('userCredits').innerText = userData.credits;
-                    document.querySelector('.avatar').innerText = userData.name.charAt(0).toUpperCase();
-                    localStorage.setItem('nexusUser', JSON.stringify(userData));
-                }
-            });
-        }
+
+        // Load user data
+        db.collection('users').doc(user.uid).onSnapshot((doc) => {
+            if (doc.exists) {
+                const userData = doc.data();
+                document.getElementById('userName').innerText = userData.name;
+                document.getElementById('userCredits').innerText = userData.credits;
+                document.querySelector('.avatar').innerText = userData.name.charAt(0).toUpperCase();
+                localStorage.setItem('nexusUser', JSON.stringify(userData));
+            }
+        });
 
         document.getElementById('logoutBtn').addEventListener('click', () => {
             firebase.auth().signOut().then(() => {
@@ -53,61 +45,73 @@ function showToast(message) {
     setTimeout(() => { toast.classList.remove('show'); }, 3000);
 }
 
-// Render Gallery Items
+// Render Gallery Items (Firebase + LocalStorage)
 function renderGallery() {
     const galleryGrid = document.getElementById('galleryGrid');
-    const history = JSON.parse(localStorage.getItem('nexusHistory') || '[]');
 
-    if (history.length === 0) {
-        galleryGrid.innerHTML = `
-            <div class="empty-gallery">
-                <i class="fa-solid fa-image"></i>
-                <h3>Your canvas is empty</h3>
-                <p>You haven't generated anything yet. Let's create something extraordinary.</p>
-                <button onclick="window.location.href='dashboard'" class="btn-generate" style="width: auto; padding: 12px 24px;">
-                    <i class="fa-solid fa-wand-magic-sparkles"></i> Start Generating
-                </button>
-            </div>
-        `;
-        return;
-    }
+    // 1. جلب التصاور اللي صاوب المستخدم (LocalStorage)
+    const localHistory = JSON.parse(localStorage.getItem('nexusHistory') || '[]');
 
-    galleryGrid.innerHTML = history.map(item => `
-        <div class="gallery-card">
-            <div class="gallery-img-wrapper">
-                <img src="${item.url}" alt="Generation">
-                <div class="gallery-type-badge">
-                    <i class="fa-solid fa-${item.type === 'video' ? 'film' : 'image'}"></i>
-                    ${item.type}
+    // 2. جلب التصاور الرسمية من Firebase
+    db.collection('gallery').get().then((querySnapshot) => {
+        let firebaseGallery = [];
+        querySnapshot.forEach((doc) => {
+            firebaseGallery.push(doc.data());
+        });
+
+        // 3. دمج التصاور (الفايربيس فوق باش يبانو أول حاجة)
+        let allItems = [...firebaseGallery, ...localHistory];
+
+        if (allItems.length === 0) {
+            galleryGrid.innerHTML = `
+                <div class="empty-gallery">
+                    <i class="fa-solid fa-image"></i>
+                    <h3>Your canvas is empty</h3>
+                    <p>You haven't generated anything yet. Let's create something extraordinary.</p>
+                    <button onclick="window.location.href='dashboard'" class="btn-generate" style="width: auto; padding: 12px 24px;">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> Start Generating
+                    </button>
                 </div>
-                <div class="gallery-actions">
-                    <button class="action-btn" title="Download" onclick="downloadItem('${item.url}', '${item.type}')"><i class="fa-solid fa-download"></i></button>
-                    <button class="action-btn delete" title="Delete" onclick="deleteItem(${item.id})"><i class="fa-solid fa-trash"></i></button>
+            `;
+            return;
+        }
+
+        galleryGrid.innerHTML = allItems.map(item => `
+            <div class="gallery-card">
+                <div class="gallery-img-wrapper">
+                    ${item.type === 'video' ? 
+                        `<video src="${item.url}" controls style="width: 100%; height: 100%; object-fit: cover;"></video>` : 
+                        `<img src="${item.url}" alt="Generation">`
+                    }
+                    <div class="gallery-type-badge">
+                        <i class="fa-solid fa-${item.type === 'video' ? 'film' : 'image'}"></i>
+                        ${item.type}
+                    </div>
+                    <div class="gallery-actions">
+                        <button class="action-btn" title="Open" onclick="window.open('${item.url}', '_blank')"><i class="fa-solid fa-up-right-from-square"></i></button>
+                        <button class="action-btn delete" title="Delete" onclick="deleteItem('${item.id || ''}')"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                </div>
+                <div class="gallery-info">
+                    <div class="gallery-model">${item.model}</div>
+                    <div class="gallery-date">${item.date}</div>
                 </div>
             </div>
-            <div class="gallery-info">
-                <div class="gallery-model">${item.model}</div>
-                <div class="gallery-date">${item.date}</div>
-            </div>
-        </div>
-    `).join('');
+        `).join('');
+    }).catch((error) => {
+        console.error("Error fetching gallery: ", error);
+    });
 }
 
-// Delete Item
+// Delete Item (Local Only for user generated)
 function deleteItem(id) {
+    if (!id) {
+        showToast('Official showcase items cannot be deleted.');
+        return;
+    }
     let history = JSON.parse(localStorage.getItem('nexusHistory') || '[]');
-    history = history.filter(item => item.id !== id);
+    history = history.filter(item => item.id != id);
     localStorage.setItem('nexusHistory', JSON.stringify(history));
     renderGallery();
     showToast('Item deleted successfully.');
-}
-
-// Download Item
-function downloadItem(url, type) {
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `nexus-${type}-${Date.now()}.jpg`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
 }
