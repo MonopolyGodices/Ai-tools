@@ -45,6 +45,26 @@ function showToast(message) {
     setTimeout(() => { toast.classList.remove('show'); }, 3000);
 }
 
+// Helper: Get Video Embed (يدعم MP4، Streamable، ويوتيوب)
+function getVideoEmbed(url) {
+    // يلا كان رابط فيديو مباشر (mp4)
+    if (url.match(/\.(mp4|webm)$/)) {
+        return `<video src="${url}" controls style="width: 100%; height: 100%; object-fit: cover;"></video>`;
+    }
+    // يلا كان من Streamable
+    if (url.includes('streamable.com')) {
+        let embedUrl = url.replace('streamable.com/', 'streamable.com/e/');
+        return `<iframe src="${embedUrl}" frameborder="0" width="100%" height="100%" allowfullscreen style="width: 100%; height: 100%; object-fit: cover;"></iframe>`;
+    }
+    // يلا كان من YouTube
+    if (url.includes('youtube.com/watch?v=')) {
+        let videoId = url.split('v=')[1].split('&')[0];
+        return `<iframe src="https://www.youtube.com/embed/${videoId}" frameborder="0" width="100%" height="100%" allowfullscreen style="width: 100%; height: 100%; object-fit: cover;"></iframe>`;
+    }
+    // يلا كان ما عرفناش النوع
+    return `<video src="${url}" controls style="width: 100%; height: 100%; object-fit: cover;"></video>`;
+}
+
 // Render Gallery Items (Firebase Promo + LocalStorage)
 function renderGallery(userId) {
     const galleryGrid = document.getElementById('galleryGrid');
@@ -59,7 +79,7 @@ function renderGallery(userId) {
             promoGallery = doc.data().promoGallery;
         }
 
-        // 3. دمج التصاور (الفايبيس فوق باش يبانو أول حاجة)
+        // 3. دمج التصاور (Firebase فوق باش يبانو أول حاجة)
         let allItems = [...promoGallery, ...localHistory];
 
         if (allItems.length === 0) {
@@ -80,7 +100,7 @@ function renderGallery(userId) {
             <div class="gallery-card">
                 <div class="gallery-img-wrapper">
                     ${item.type === 'video' ? 
-                        `<video src="${item.url}" controls style="width: 100%; height: 100%; object-fit: cover;"></video>` : 
+                        getVideoEmbed(item.url) : 
                         `<img src="${item.url}" alt="Generation">`
                     }
                     <div class="gallery-type-badge">
